@@ -240,6 +240,13 @@
       opacity: 0.85;
     }
 
+    /* 相对时间标签 */
+    .project-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
     @media (max-width: 768px) {
       .page-header {
         flex-direction: column;
@@ -248,6 +255,12 @@
       .project-actions .btn-secondary,
       .project-actions .btn-danger {
         flex: 1;
+      }
+      .data-actions {
+        flex-direction: column;
+      }
+      .data-actions .btn-secondary {
+        width: 100%;
       }
     }
   </style>
@@ -336,6 +349,18 @@
         String(d.getMinutes()).padStart(2, '0');
     }
 
+    function relativeTime(iso) {
+      var now = Date.now();
+      var then = new Date(iso).getTime();
+      var diff = Math.floor((now - then) / 1000);
+      if (diff < 60) return '刚刚';
+      if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+      if (diff < 86400) return Math.floor(diff / 3600) + ' 小时前';
+      if (diff < 172800) return '昨天';
+      if (diff < 604800) return Math.floor(diff / 86400) + ' 天前';
+      return formatDate(iso).slice(0, 10);
+    }
+
     function truncate(text, max) {
       return text.length > max ? text.slice(0, max) + '...' : text;
     }
@@ -358,7 +383,7 @@
       if (projects.length === 0) {
         container.innerHTML =
           '<div class="empty-state">' +
-            '<div class="empty-icon">📂</div>' +
+            '<div class="empty-icon">🚀</div>' +
             '<h2>还没有项目</h2>' +
             '<p>有了想法就可以开始，点击下方按钮创建你的第一个项目</p>' +
             '<a href="idea.html" class="btn-primary" style="width:auto; display:inline-block;">开始做第一个项目</a>' +
@@ -373,12 +398,14 @@
           '<div class="project-card">' +
             '<div class="project-card-top">' +
               '<div class="project-title">' + escapeHtml(p.title) + '</div>' +
-              '<span class="stage-badge ' + stageInfo.cls + '">' + stageInfo.text + '</span>' +
+              '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">' +
+                '<span class="stage-badge ' + stageInfo.cls + '">' + stageInfo.text + '</span>' +
+                '<span class="project-time">' + relativeTime(p.updated_at) + '</span>' +
+              '</div>' +
             '</div>' +
             '<div class="project-idea-preview">' + escapeHtml(truncate(p.idea, 80)) + '</div>' +
             '<div class="project-meta">' +
               '<span>创建于 ' + formatDate(p.created_at) + '</span>' +
-              '<span>更新于 ' + formatDate(p.updated_at) + '</span>' +
             '</div>' +
             '<div class="project-actions">' +
               '<a href="' + getNextUrl(p) + '" class="btn-primary">继续推进</a>' +

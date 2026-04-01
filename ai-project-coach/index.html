@@ -12,6 +12,11 @@
       text-align: center;
     }
 
+    @keyframes badgeBreathe {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
     .hero-badge {
       display: inline-block;
       background: rgba(0, 229, 255, 0.12);
@@ -23,6 +28,7 @@
       border: 1px solid rgba(0, 229, 255, 0.25);
       margin-bottom: 24px;
       letter-spacing: 0.3px;
+      animation: badgeBreathe 3s ease-in-out infinite;
     }
 
     .hero h1 {
@@ -34,6 +40,10 @@
       max-width: 700px;
       margin-left: auto;
       margin-right: auto;
+      background: linear-gradient(135deg, #ffffff 60%, #a0f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .hero-sub {
@@ -46,7 +56,7 @@
 
     .hero-actions {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -95,14 +105,14 @@
     }
 
     .value-icon {
-      font-size: 28px;
+      font-size: 32px;
       margin-bottom: 14px;
     }
 
     .value-card h3 {
       font-size: 17px;
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
 
     .value-card p {
@@ -138,10 +148,9 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: rgba(0, 229, 255, 0.12);
-      border: 1.5px solid var(--accent);
-      color: var(--accent);
-      font-weight: 700;
+      background: var(--accent);
+      color: #0a0a0f;
+      font-weight: 800;
       font-size: 15px;
       margin-bottom: 14px;
     }
@@ -158,11 +167,24 @@
       line-height: 1.6;
     }
 
+    /* CSS 箭头替代文字 → */
     .step-arrow {
-      font-size: 22px;
-      color: var(--border);
-      padding-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+      padding-top: 10px;
+      width: 32px;
+    }
+
+    .step-arrow::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 12px solid var(--border);
     }
 
     /* ===== 成果预览 ===== */
@@ -269,16 +291,34 @@
       color: var(--accent);
     }
 
+    /* FAQ 箭头用 CSS 三角形 */
     .faq-icon {
-      font-size: 18px;
-      color: var(--text-secondary);
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: transform 0.3s;
     }
 
+    .faq-icon::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-secondary);
+      transition: border-top-color 0.2s;
+    }
+
     .faq-item.open .faq-icon {
-      transform: rotate(45deg);
-      color: var(--accent);
+      transform: rotate(180deg);
+    }
+
+    .faq-item.open .faq-icon::after {
+      border-top-color: var(--accent);
     }
 
     .faq-answer {
@@ -297,6 +337,8 @@
       font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.75;
+      border-left: 2px solid var(--accent);
+      padding-left: 14px;
     }
 
     /* ===== 响应式 ===== */
@@ -328,8 +370,17 @@
       }
 
       .step-arrow {
-        transform: rotate(90deg);
         padding-top: 0;
+        width: auto;
+        height: 24px;
+      }
+
+      /* 移动端箭头向下 */
+      .step-arrow::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 12px solid var(--border);
+        border-bottom: none;
       }
 
       .example-grid {
@@ -393,13 +444,13 @@
             <h3>输入你的想法</h3>
             <p>用大白话描述你想做什么软件</p>
           </div>
-          <div class="step-arrow">→</div>
+          <div class="step-arrow"></div>
           <div class="step">
             <div class="step-num">2</div>
             <h3>AI 帮你理清需求</h3>
             <p>多轮对话，像项目经理一样追问细节</p>
           </div>
-          <div class="step-arrow">→</div>
+          <div class="step-arrow"></div>
           <div class="step">
             <div class="step-num">3</div>
             <h3>生成方案，开始干</h3>
@@ -444,7 +495,7 @@
           <div class="faq-item">
             <button class="faq-question">
               我完全不懂编程，能用吗？
-              <span class="faq-icon">+</span>
+              <span class="faq-icon"></span>
             </button>
             <div class="faq-answer">
               <p>完全可以。本站会一步步引导你把想法整理成方案，并教你怎么用 AI 编程工具（如 Claude Code、Cursor、TRAE 等）把方案变成产品。你不需要自己写任何代码。</p>
@@ -453,7 +504,7 @@
           <div class="faq-item">
             <button class="faq-question">
               这个网站本身会帮我写代码吗？
-              <span class="faq-icon">+</span>
+              <span class="faq-icon"></span>
             </button>
             <div class="faq-answer">
               <p>不会。本站是教练，不是代码生成器。它帮你做两件事：第一，把你的想法整理成专业的设计书和任务清单；第二，手把手教你怎么用外部 AI 工具完成开发。所有实际操作都在你自己的电脑和 AI 工具中进行。</p>
@@ -462,7 +513,7 @@
           <div class="faq-item">
             <button class="faq-question">
               需要付费吗？
-              <span class="faq-icon">+</span>
+              <span class="faq-icon"></span>
             </button>
             <div class="faq-answer">
               <p>本站完全免费。你需要的 AI 工具（如 Claude、ChatGPT、豆包、Kimi 等）大多有免费额度可以起步。本站会在相应环节提供各工具的链接和使用说明。</p>
@@ -471,7 +522,7 @@
           <div class="faq-item">
             <button class="faq-question">
               我的数据安全吗？
-              <span class="faq-icon">+</span>
+              <span class="faq-icon"></span>
             </button>
             <div class="faq-answer">
               <p>本站所有数据都存储在你自己的浏览器中，不会上传到任何服务器。清除浏览器数据会导致记录丢失，建议定期导出备份。</p>
@@ -480,7 +531,7 @@
           <div class="faq-item">
             <button class="faq-question">
               生成设计书之后怎么办？
-              <span class="faq-icon">+</span>
+              <span class="faq-icon"></span>
             </button>
             <div class="faq-answer">
               <p>本站会继续教你下一步：如何选择 AI 编程工具、如何安装、如何进入命令行、如何把任务交给 AI 执行、如何验证结果。从想法到上线，全程有指导。</p>

@@ -101,8 +101,22 @@
       transition: color 0.2s;
     }
     .accordion-header:hover { color: var(--accent); }
-    .acc-icon { font-size: 16px; color: var(--text-secondary); flex-shrink: 0; transition: transform 0.3s; }
-    .accordion-item.open .acc-icon { transform: rotate(45deg); color: var(--accent); }
+    /* 手风琴箭头用 CSS 三角形（与 FAQ 风格统一） */
+    .acc-icon {
+      width: 18px; height: 18px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s;
+    }
+    .acc-icon::after {
+      content: '';
+      display: block; width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--text-secondary);
+      transition: border-top-color 0.2s;
+    }
+    .accordion-item.open .acc-icon { transform: rotate(180deg); }
+    .accordion-item.open .acc-icon::after { border-top-color: var(--accent); }
     .accordion-body {
       max-height: 0; overflow: hidden;
       transition: max-height 0.4s ease, padding 0.3s ease;
@@ -128,6 +142,10 @@
     .actions-bar .btn-primary, .actions-bar .btn-secondary { font-size: 14px; padding: 10px 20px; width: auto; }
 
     /* ===== 完成庆祝弹窗 ===== */
+    @keyframes celebrateScale {
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 1; transform: scale(1); }
+    }
     .celebrate-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.75);
       z-index: 600; display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -136,8 +154,9 @@
       background: var(--bg-secondary); border: 1px solid rgba(0,229,255,0.3);
       border-radius: var(--radius-card); padding: 36px 32px; max-width: 460px; width: 100%;
       text-align: center; box-shadow: 0 8px 48px rgba(0,229,255,0.12);
+      animation: celebrateScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
-    .celebrate-emoji { font-size: 48px; margin-bottom: 16px; }
+    .celebrate-emoji { font-size: 64px; margin-bottom: 16px; }
     .celebrate-modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
     .celebrate-modal p { font-size: 14px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 28px; }
     .celebrate-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
@@ -167,6 +186,9 @@
       .actions-bar .btn-primary, .actions-bar .btn-secondary { width: 100%; }
       .celebrate-actions { flex-direction: column; }
       .celebrate-actions .btn-primary, .celebrate-actions .btn-secondary { width: 100%; }
+      /* 展开内容中的代码允许横向滚动，不折行 */
+      .accordion-body pre { white-space: pre; overflow-x: auto; }
+      .prompt-text { padding-right: 16px; padding-bottom: 50px; }
     }
   </style>
 </head>
@@ -351,17 +373,26 @@
       '</div>';
 
     /* ===== 渲染手风琴 ===== */
+    var GUIDE_EMOJIS = {
+      '基础知识': '📖',
+      'AI 编程工具': '🤖'
+    };
+    var LAST_ITEM_EMOJI = '💡';
+
     function renderAccordion() {
       var html = '<div class="accordion-list">';
       GUIDES.forEach(function (grp) {
         html += '<div class="accordion-group-label">' + grp.group + '</div>';
+        var groupEmoji = GUIDE_EMOJIS[grp.group] || '';
         grp.items.forEach(function (item, idx) {
           var id = 'acc-' + grp.group.replace(/\s+/g,'') + idx;
+          var isLast = (grp === GUIDES[GUIDES.length - 1]) && (idx === grp.items.length - 1);
+          var emoji = isLast ? LAST_ITEM_EMOJI : groupEmoji;
           html +=
             '<div class="accordion-item" id="' + id + '">' +
               '<button class="accordion-header" onclick="toggleAcc(\'' + id + '\')">' +
-                esc(item.title) +
-                '<span class="acc-icon">+</span>' +
+                (emoji ? emoji + ' ' : '') + esc(item.title) +
+                '<span class="acc-icon"></span>' +
               '</button>' +
               '<div class="accordion-body"><pre>' + esc(item.body) + '</pre></div>' +
             '</div>';

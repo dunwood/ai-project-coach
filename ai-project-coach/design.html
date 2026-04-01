@@ -83,6 +83,13 @@
       margin-bottom: 14px;
     }
 
+    /* ===== Tab 切换淡入 ===== */
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .tab-panel.active { animation: tabFadeIn 0.2s ease both; }
+
     /* ===== 提示词区 ===== */
     .prompt-section {
       background: var(--bg-secondary);
@@ -96,8 +103,9 @@
     .prompt-text {
       background: #0d0d16;
       border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
       border-radius: 8px;
-      padding: 14px 80px 14px 14px;
+      padding: 14px 80px 14px 18px;
       font-family: var(--font-code);
       font-size: 12px;
       line-height: 1.7;
@@ -161,6 +169,17 @@
     .divider-text::before { left: 0; }
     .divider-text::after { right: 0; }
 
+    /* ===== 编辑区 + 预览区 左右分栏 ===== */
+    .editor-preview-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .editor-col {}
+    .preview-col {}
+
     /* ===== 编辑区 ===== */
     textarea.design-input {
       width: 100%;
@@ -175,12 +194,15 @@
       font-size: 13px;
       line-height: 1.7;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    textarea.design-input:focus { border-color: var(--accent); }
+    textarea.design-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+    }
 
     /* ===== Markdown 预览 ===== */
-    .preview-section { margin-top: 20px; }
+    .preview-section { }
     .preview-label {
       font-size: 12px;
       font-weight: 600;
@@ -190,14 +212,14 @@
       margin-bottom: 10px;
     }
     .preview-body {
-      background: var(--bg-secondary);
+      background: #15151f;
       border: 1px solid var(--border);
       border-radius: var(--radius-card);
       padding: 20px 24px;
       font-size: 14px;
       line-height: 1.8;
       color: var(--text-secondary);
-      min-height: 80px;
+      min-height: 340px;
     }
     .preview-body h1 { font-size: 20px; font-weight: 800; color: var(--text-primary); margin: 16px 0 8px; }
     .preview-body h2 { font-size: 17px; font-weight: 700; color: var(--text-primary); margin: 14px 0 6px; }
@@ -263,11 +285,15 @@
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     @media (max-width: 768px) {
-      .tab-btn { padding: 9px 13px; font-size: 13px; }
+      .tab-btn { padding: 8px 10px; font-size: 12px; }
+      .tab-bar { overflow-x: auto; flex-wrap: nowrap; }
       .actions-bar { flex-direction: column; }
       .actions-left, .actions-right { width: 100%; }
       .actions-bar .btn-primary, .actions-bar .btn-secondary { flex: 1; }
       .divider-text::before, .divider-text::after { width: 16%; }
+      /* 移动端编辑/预览上下堆叠 */
+      .editor-preview-wrap { grid-template-columns: 1fr; }
+      .prompt-text { padding-right: 16px; padding-bottom: 50px; }
     }
   </style>
 </head>
@@ -569,13 +595,17 @@
         /* 分割线 */
         '<div class="divider-text">在 AI 中生成设计书后，粘贴到下面：</div>' +
 
-        /* textarea */
-        '<textarea class="design-input" id="ta-' + t.key + '" placeholder="把 AI 生成的设计书内容粘贴到这里..." oninput="onInput(\'' + t.key + '\')">' + esc(drafts[t.key]) + '</textarea>' +
-
-        /* 预览区 */
-        '<div class="preview-section">' +
-          '<div class="preview-label">预览</div>' +
-          '<div class="preview-body" id="preview-' + t.key + '">' + simpleMarkdownRender(drafts[t.key]) + '</div>' +
+        /* 编辑区 + 预览区 左右分栏 */
+        '<div class="editor-preview-wrap">' +
+          '<div class="editor-col">' +
+            '<textarea class="design-input" id="ta-' + t.key + '" placeholder="把 AI 生成的设计书内容粘贴到这里..." oninput="onInput(\'' + t.key + '\')">' + esc(drafts[t.key]) + '</textarea>' +
+          '</div>' +
+          '<div class="preview-col">' +
+            '<div class="preview-section">' +
+              '<div class="preview-label">预览</div>' +
+              '<div class="preview-body" id="preview-' + t.key + '">' + simpleMarkdownRender(drafts[t.key]) + '</div>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
 
       '</div>';
