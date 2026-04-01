@@ -5,17 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>需求澄清 — AI 项目教练</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+    }
+    .breadcrumb a:hover {
+      color: var(--accent);
+    }
+    .breadcrumb span {
+      margin: 0 6px;
+    }
+
+    .page-header {
+      margin-bottom: 36px;
+    }
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    .coming-badge {
+      display: inline-block;
+      background: rgba(255, 215, 64, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(255, 215, 64, 0.25);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .project-info-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .project-info-card .project-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+    .project-info-card .project-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .project-info-card .idea-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    .project-info-card .idea-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+
+    .error-card {
+      background: rgba(255, 82, 82, 0.08);
+      border: 1px solid rgba(255, 82, 82, 0.25);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      text-align: center;
+    }
+    .error-card p {
+      color: var(--danger);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .page-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .page-links a {
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .page-links {
+        flex-direction: column;
+      }
+      .page-links a {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="nav-mount"></div>
+
   <div class="page-body">
-    <main class="container" style="padding-top: 80px; padding-bottom: 80px; text-align: center;">
-      <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 24px;">🚧 即将上线</p>
-      <a href="index.html" class="btn-secondary" style="display: inline-block; width: auto;">返回首页</a>
-    </main>
+    <div class="container" style="padding-top: 48px; padding-bottom: 80px; max-width: 680px;">
+
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="index.html">首页</a>
+        <span>›</span>
+        <a href="workspace.html">工作台</a>
+        <span>›</span>
+        <span>需求澄清</span>
+      </div>
+
+      <!-- 页面标题 -->
+      <div class="page-header">
+        <div class="coming-badge">即将上线</div>
+        <h1>需求澄清（即将上线）</h1>
+        <p>这个环节会引导你把模糊的想法变成清晰的项目定义。正在开发中，敬请期待。</p>
+      </div>
+
+      <!-- 项目信息卡 / 错误提示 -->
+      <div id="project-info-container"></div>
+
+      <!-- 底部链接 -->
+      <div class="page-links" id="page-links"></div>
+
+    </div>
   </div>
+
   <div id="footer-mount"></div>
+
+  <script src="js/project.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/legal.js"></script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var id = params.get('id');
+      var infoContainer = document.getElementById('project-info-container');
+      var linksContainer = document.getElementById('page-links');
+
+      if (!id) {
+        infoContainer.innerHTML =
+          '<div class="error-card"><p>未找到项目，请从工作台选择项目继续。</p></div>';
+        linksContainer.innerHTML =
+          '<a href="workspace.html" class="btn-secondary" style="width:auto;">返回工作台</a>';
+        return;
+      }
+
+      var project = getProject(id);
+      if (!project) {
+        infoContainer.innerHTML =
+          '<div class="error-card"><p>找不到该项目，可能已被删除。</p></div>';
+        linksContainer.innerHTML =
+          '<a href="workspace.html" class="btn-secondary" style="width:auto;">返回工作台</a>';
+        return;
+      }
+
+      infoContainer.innerHTML =
+        '<div class="project-info-card">' +
+          '<div class="project-label">当前项目</div>' +
+          '<div class="project-name">' + escapeHtml(project.title) + '</div>' +
+          '<div class="idea-label">你的想法</div>' +
+          '<div class="idea-text">' + escapeHtml(project.idea) + '</div>' +
+        '</div>';
+
+      linksContainer.innerHTML =
+        '<a href="workspace.html" class="btn-secondary" style="width:auto;">返回工作台</a>' +
+        '<a href="idea.html?id=' + id + '" class="btn-secondary" style="width:auto;">编辑想法</a>';
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -5,17 +5,363 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>输入想法 — AI 项目教练</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+    }
+    .breadcrumb a:hover {
+      color: var(--accent);
+    }
+    .breadcrumb span {
+      margin: 0 6px;
+    }
+
+    .page-header {
+      margin-bottom: 40px;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: -0.3px;
+    }
+    .page-header p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 600px;
+    }
+
+    .form-group {
+      margin-bottom: 28px;
+    }
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+    .char-count {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    textarea.input {
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.7;
+    }
+
+    /* 示例区 */
+    .examples-section {
+      margin: 40px 0;
+    }
+    .examples-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      text-transform: none;
+    }
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .example-chip {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: left;
+    }
+    .example-chip:hover {
+      border-color: rgba(0, 229, 255, 0.4);
+      background: var(--bg-tertiary);
+    }
+    .example-chip.selected {
+      border-color: var(--accent);
+      background: rgba(0, 229, 255, 0.06);
+    }
+    .example-chip-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .example-chip-idea {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* 操作区 */
+    .form-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+    }
+    .form-actions-row {
+      display: flex;
+      gap: 12px;
+    }
+    .form-actions-row .btn-primary,
+    .form-actions-row .btn-secondary {
+      flex: 1;
+    }
+    .form-actions-link {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .form-actions-link a {
+      color: var(--accent);
+    }
+
+    .error-msg {
+      background: rgba(255, 82, 82, 0.1);
+      border: 1px solid rgba(255, 82, 82, 0.3);
+      border-radius: var(--radius-card);
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--danger);
+      margin-bottom: 16px;
+      display: none;
+    }
+    .error-msg.show {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .examples-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-actions-row {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="nav-mount"></div>
+
   <div class="page-body">
-    <main class="container" style="padding-top: 80px; padding-bottom: 80px; text-align: center;">
-      <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 24px;">🚧 即将上线</p>
-      <a href="index.html" class="btn-secondary" style="display: inline-block; width: auto;">返回首页</a>
-    </main>
+    <div class="container" style="padding-top: 48px; padding-bottom: 80px; max-width: 680px;">
+
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="index.html">首页</a>
+        <span>›</span>
+        <span id="breadcrumb-label">开始做项目</span>
+      </div>
+
+      <!-- 页面标题 -->
+      <div class="page-header">
+        <h1 id="page-title">告诉我，你想做什么？</h1>
+        <p>用大白话描述就行。比如你想做一个什么工具、给谁用、解决什么问题。不需要专业术语，想到什么说什么。</p>
+      </div>
+
+      <!-- 错误提示 -->
+      <div class="error-msg" id="error-msg"></div>
+
+      <!-- 项目名称 -->
+      <div class="form-group">
+        <label class="form-label" for="input-title">给项目起个名字</label>
+        <input type="text" id="input-title" class="input" placeholder="比如：高考择业助手" maxlength="50" />
+        <div class="char-count" id="title-count">已输入 0 字</div>
+        <div class="form-hint">简短好记就行，后面可以改</div>
+      </div>
+
+      <!-- 想法描述 -->
+      <div class="form-group">
+        <label class="form-label" for="input-idea">描述你的想法</label>
+        <textarea id="input-idea" class="input" rows="6"
+          placeholder="比如：我想做一个帮高考生选专业的 AI 工具。家长输入孩子的成绩和兴趣，系统推荐适合的专业，并给出 AI 时代这个专业的前景分析。"></textarea>
+        <div class="char-count" id="idea-count">已输入 0 字</div>
+      </div>
+
+      <!-- 示例想法 -->
+      <div class="examples-section">
+        <div class="examples-title">不知道怎么写？参考这些例子（点击可填入）</div>
+        <div class="examples-grid" id="examples-grid">
+          <!-- 由 JS 渲染 -->
+        </div>
+      </div>
+
+      <!-- 操作栏 -->
+      <div class="form-actions">
+        <div class="form-actions-row">
+          <button class="btn-primary" id="btn-save-continue" onclick="handleSave('continue')">
+            保存并继续
+          </button>
+          <button class="btn-secondary" id="btn-save-later" onclick="handleSave('later')">
+            保存到工作台，稍后继续
+          </button>
+        </div>
+        <div class="form-actions-link">
+          <a href="workspace.html">查看我的工作台</a>
+        </div>
+      </div>
+
+    </div>
   </div>
+
   <div id="footer-mount"></div>
+
+  <script src="js/project.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/legal.js"></script>
+  <script>
+    var EXAMPLES = [
+      {
+        name: '高考择业助手',
+        idea: '我想做一个帮高考生选专业的 AI 工具。家长输入孩子的成绩和兴趣，系统推荐适合的专业，并给出 AI 时代这个专业的前景分析和就业方向。'
+      },
+      {
+        name: '读书笔记整理工具',
+        idea: '我想做一个网页工具，把我在各种地方记的读书笔记整理归纳。我粘贴进一段摘录，工具自动识别书名、分类、提取关键观点，最后生成一份结构化的笔记合集。'
+      },
+      {
+        name: '小区跑腿互助平台',
+        idea: '我想做一个小程序，小区居民可以发布跑腿需求（取快递、买菜、遛狗等），其他居民可以接单帮忙，赚点小钱或者积分。'
+      },
+      {
+        name: 'AI 面试模拟器',
+        idea: '我想做一个模拟面试的网页工具。用户输入目标岗位，AI 扮演面试官提问，用户回答后 AI 给出评分和改进建议。'
+      }
+    ];
+
+    var selectedExample = null;
+    var editingId = null;
+
+    // 检查是否编辑模式
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var id = params.get('id');
+      if (id) {
+        var project = getProject(id);
+        if (project) {
+          editingId = id;
+          document.getElementById('input-title').value = project.title;
+          document.getElementById('input-idea').value = project.idea;
+          updateCounts();
+          document.getElementById('page-title').textContent = '编辑项目想法';
+          document.getElementById('breadcrumb-label').textContent = '编辑想法';
+          document.getElementById('btn-save-continue').textContent = '保存修改';
+          document.getElementById('btn-save-later').textContent = '保存修改并返回工作台';
+        }
+      }
+    })();
+
+    // 渲染示例卡片
+    (function () {
+      var grid = document.getElementById('examples-grid');
+      EXAMPLES.forEach(function (ex, i) {
+        var chip = document.createElement('button');
+        chip.className = 'example-chip';
+        chip.innerHTML =
+          '<div class="example-chip-name">' + ex.name + '</div>' +
+          '<div class="example-chip-idea">' + ex.idea + '</div>';
+        chip.addEventListener('click', function () {
+          document.getElementById('input-title').value = ex.name;
+          document.getElementById('input-idea').value = ex.idea;
+          updateCounts();
+          // 选中状态
+          document.querySelectorAll('.example-chip').forEach(function (c) {
+            c.classList.remove('selected');
+          });
+          chip.classList.add('selected');
+          selectedExample = i;
+        });
+        grid.appendChild(chip);
+      });
+    })();
+
+    // 字数实时更新
+    function updateCounts() {
+      var title = document.getElementById('input-title').value;
+      var idea = document.getElementById('input-idea').value;
+      document.getElementById('title-count').textContent = '已输入 ' + title.length + ' 字';
+      document.getElementById('idea-count').textContent = '已输入 ' + idea.length + ' 字';
+    }
+
+    document.getElementById('input-title').addEventListener('input', function () {
+      updateCounts();
+      clearSelectedExample();
+    });
+    document.getElementById('input-idea').addEventListener('input', function () {
+      updateCounts();
+      clearSelectedExample();
+    });
+
+    function clearSelectedExample() {
+      selectedExample = null;
+      document.querySelectorAll('.example-chip').forEach(function (c) {
+        c.classList.remove('selected');
+      });
+    }
+
+    // 保存逻辑
+    function handleSave(mode) {
+      var title = document.getElementById('input-title').value.trim();
+      var idea = document.getElementById('input-idea').value.trim();
+      var errorEl = document.getElementById('error-msg');
+
+      if (!title) {
+        showError('请填写项目名称');
+        document.getElementById('input-title').focus();
+        return;
+      }
+      if (!idea) {
+        showError('请描述你的想法');
+        document.getElementById('input-idea').focus();
+        return;
+      }
+      errorEl.classList.remove('show');
+
+      var project;
+      if (editingId) {
+        project = updateProject(editingId, { title: title, idea: idea });
+      } else {
+        project = createProject(title, idea);
+      }
+
+      if (mode === 'continue') {
+        window.location.href = 'clarify.html?id=' + project.id;
+      } else {
+        window.location.href = 'workspace.html';
+      }
+    }
+
+    function showError(msg) {
+      var el = document.getElementById('error-msg');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+
+    // 初始化字数
+    updateCounts();
+  </script>
 </body>
 </html>
