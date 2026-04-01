@@ -5,20 +5,540 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>任务拆解 — AI 项目教练</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== 面包屑 ===== */
+    .breadcrumb { font-size: 13px; color: var(--text-secondary); margin-bottom: 28px; }
+    .breadcrumb a { color: var(--text-secondary); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb span { margin: 0 5px; }
+
+    /* ===== 页面标题 ===== */
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px; }
+    .page-header p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; max-width: 600px; }
+
+    /* ===== 项目信息栏 ===== */
+    .project-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-card); padding: 12px 18px; margin-bottom: 32px;
+    }
+    .project-bar-name { font-size: 15px; font-weight: 700; }
+    .stage-badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 10px; border-radius: 20px;
+      background: rgba(124,77,255,0.1); color: var(--accent-purple);
+      border: 1px solid rgba(124,77,255,0.25);
+    }
+    .project-bar-link { font-size: 13px; margin-left: auto; }
+
+    /* ===== 区域卡片 ===== */
+    .section-card {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-card); padding: 24px; margin-bottom: 24px;
+    }
+    .section-card h2 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .section-card .section-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; }
+
+    /* ===== 提示词框 ===== */
+    .prompt-box { display: none; position: relative; margin-top: 14px; }
+    .prompt-box.visible { display: block; }
+    .prompt-text {
+      background: #0d0d16; border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 80px 14px 14px; font-family: var(--font-code); font-size: 12px;
+      line-height: 1.7; color: #cdd6f4; white-space: pre-wrap; word-break: break-word;
+      max-height: 320px; overflow-y: auto;
+    }
+    .btn-copy {
+      position: absolute; top: 8px; right: 8px;
+      background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text-secondary); font-size: 12px; font-family: var(--font-main);
+      font-weight: 600; padding: 4px 11px; cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-copy:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-copy.copied { color: var(--success); border-color: var(--success); }
+
+    /* 警告提示框 */
+    .notice-box {
+      background: rgba(255,215,64,0.07); border: 1px solid rgba(255,215,64,0.3);
+      border-radius: 8px; padding: 12px 16px; margin-top: 14px;
+      font-size: 13px; color: var(--warning); line-height: 1.6;
+    }
+
+    /* AI 平台链接 */
+    .ai-links-wrap { margin-top: 16px; }
+    .ai-links-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+    .ai-links { display: flex; flex-wrap: wrap; gap: 7px; }
+    .ai-link-btn {
+      display: inline-block; background: var(--bg-tertiary); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 600;
+      padding: 5px 12px; transition: color 0.2s, border-color 0.2s;
+    }
+    .ai-link-btn:hover { color: var(--accent); border-color: rgba(0,229,255,0.4); }
+
+    /* ===== Textarea ===== */
+    textarea.task-input {
+      width: 100%; min-height: 340px; resize: vertical;
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      border-radius: var(--radius-input); padding: 14px;
+      color: var(--text-primary); font-family: var(--font-code); font-size: 13px;
+      line-height: 1.7; outline: none; transition: border-color 0.2s;
+      margin-bottom: 12px;
+    }
+    textarea.task-input:focus { border-color: var(--accent); }
+
+    /* ===== 手风琴 ===== */
+    .accordion-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .accordion-item {
+      background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden;
+    }
+    .accordion-header {
+      width: 100%; background: none; border: none; padding: 15px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-primary);
+      font-family: var(--font-main); text-align: left; gap: 12px;
+      transition: color 0.2s;
+    }
+    .accordion-header:hover { color: var(--accent); }
+    .acc-icon { font-size: 16px; color: var(--text-secondary); flex-shrink: 0; transition: transform 0.3s; }
+    .accordion-item.open .acc-icon { transform: rotate(45deg); color: var(--accent); }
+    .accordion-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+      padding: 0 18px; font-size: 13px; color: var(--text-secondary); line-height: 1.8;
+    }
+    .accordion-item.open .accordion-body { max-height: 1200px; padding: 0 18px 18px; }
+    .accordion-body pre {
+      background: #0d0d16; border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px; font-family: var(--font-code); font-size: 12px;
+      color: #cdd6f4; white-space: pre-wrap; margin: 10px 0; overflow-x: auto;
+    }
+    .accordion-group-label {
+      font-size: 11px; font-weight: 700; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    }
+
+    /* ===== 底部操作栏 ===== */
+    .actions-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .actions-bar .btn-primary, .actions-bar .btn-secondary { font-size: 14px; padding: 10px 20px; width: auto; }
+
+    /* ===== 完成庆祝弹窗 ===== */
+    .celebrate-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      z-index: 600; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .celebrate-modal {
+      background: var(--bg-secondary); border: 1px solid rgba(0,229,255,0.3);
+      border-radius: var(--radius-card); padding: 36px 32px; max-width: 460px; width: 100%;
+      text-align: center; box-shadow: 0 8px 48px rgba(0,229,255,0.12);
+    }
+    .celebrate-emoji { font-size: 48px; margin-bottom: 16px; }
+    .celebrate-modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+    .celebrate-modal p { font-size: 14px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 28px; }
+    .celebrate-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .celebrate-actions .btn-primary, .celebrate-actions .btn-secondary { width: auto; font-size: 14px; }
+
+    /* ===== 错误/警告卡 ===== */
+    .error-card { background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.25); border-radius: var(--radius-card); padding: 24px; }
+    .error-card p { color: var(--danger); font-size: 14px; margin-bottom: 14px; }
+    .info-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px; margin-bottom: 24px; }
+    .info-card.warn { border-color: rgba(255,215,64,0.3); background: rgba(255,215,64,0.05); }
+    .info-card .warn-title { font-size: 15px; font-weight: 700; color: var(--warning); margin-bottom: 8px; }
+    .info-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.7; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;
+      padding: 11px 22px; font-size: 14px; color: var(--success); font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4); opacity: 0;
+      transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 999; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 768px) {
+      .actions-bar { flex-direction: column; }
+      .actions-bar .btn-primary, .actions-bar .btn-secondary { width: 100%; }
+      .celebrate-actions { flex-direction: column; }
+      .celebrate-actions .btn-primary, .celebrate-actions .btn-secondary { width: 100%; }
+    }
+  </style>
 </head>
 <body>
   <div id="nav-mount"></div>
+
   <div class="page-body">
-    <main class="container" style="padding-top: 48px; padding-bottom: 80px; max-width: 680px;">
+    <div class="container" style="padding-top: 48px; padding-bottom: 100px; max-width: 760px;">
+
       <div class="page-nav">
         <a href="index.html" class="nav-link">← 返回首页</a>
         <a href="javascript:history.back()" class="nav-link">← 返回上一页</a>
       </div>
-      <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 24px;">🚧 即将上线</p>
-    </main>
+
+      <div class="breadcrumb">
+        <a href="index.html">首页</a><span>›</span>
+        <a href="workspace.html">工作台</a><span>›</span>
+        <span>任务拆解</span>
+      </div>
+
+      <div id="page-content"></div>
+
+    </div>
   </div>
+
+  <!-- 完成庆祝弹窗 -->
+  <div class="celebrate-overlay" id="celebrate-overlay" style="display:none">
+    <div class="celebrate-modal">
+      <div class="celebrate-emoji">🎉</div>
+      <h2>恭喜你完成了全过程！</h2>
+      <p>你已经完成了从想法到可执行方案的全过程。<br>现在打开你的 AI 编程工具，开始把方案变成真正的产品吧！</p>
+      <div class="celebrate-actions">
+        <a href="workspace.html" class="btn-secondary">返回工作台</a>
+        <a href="idea.html" class="btn-primary">再做一个新项目</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
   <div id="footer-mount"></div>
+
+  <script src="js/project.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/legal.js"></script>
+  <script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var projectId = params.get('id');
+    var content = document.getElementById('page-content');
+
+    /* ===== 错误显示 ===== */
+    function showError(msg, extra) {
+      content.innerHTML = '<div class="error-card"><p>' + msg + '</p>' +
+        (extra || '<a href="workspace.html" class="btn-secondary" style="width:auto;display:inline-block;">返回工作台</a>') + '</div>';
+    }
+
+    if (!projectId) { showError('未找到项目，请从工作台选择项目继续。'); return; }
+    var project = getProject(projectId);
+    if (!project) { showError('找不到该项目，可能已被删除。'); return; }
+
+    /* 检查 design_doc */
+    var doc = project.design_doc || {};
+    var designContent = (doc.ai_coding || doc.standard || doc.popular || '').trim();
+    if (!designContent) {
+      content.innerHTML =
+        '<div class="info-card warn"><div class="warn-title">⚠ 请先生成设计书</div>' +
+        '<p>任务拆解需要先完成设计书生成步骤。</p>' +
+        '<a href="design.html?id=' + projectId + '" class="btn-primary" style="width:auto;display:inline-block;">前往生成设计书</a></div>';
+      return;
+    }
+
+    var ans = project.clarify_answers || {};
+    var taskPlan = project.task_plan || {};
+
+    /* ===== 工具 ===== */
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function todayStr() {
+      var d = new Date();
+      return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    }
+
+    /* ===== 提示词构建 ===== */
+    function buildTaskPrompt() {
+      return '请根据以下设计书内容，帮我把项目拆解成一步步的开发任务。\n\n' +
+        '要求：\n' +
+        '1. 按阶段分组：\n' +
+        '   - 阶段一：项目骨架搭建（创建文件结构、基础页面、全局样式）\n' +
+        '   - 阶段二：核心功能开发（实现主要功能模块）\n' +
+        '   - 阶段三：打磨优化（UI美化、移动端适配、性能优化、错误处理）\n' +
+        '   - 阶段四：部署上线（部署到服务器、域名配置、最终测试）\n\n' +
+        '2. 每个任务包含：\n' +
+        '   - 任务编号（task01, task02, task03...）\n' +
+        '   - 任务标题\n' +
+        '   - 目标（一句话说清楚做什么）\n' +
+        '   - 具体步骤（列出要做的事）\n' +
+        '   - 完成标志（怎样算做完了）\n\n' +
+        '3. 每个任务只做一件事，宁可多拆几个任务也不要合并太多内容\n' +
+        '4. 前几个任务尽量简单，后面逐步增加复杂度\n' +
+        '5. 第一个任务（task01）应该是项目初始化：创建文件夹、基础文件、初始化 Git\n\n' +
+        '设计书内容：\n---\n' + designContent + '\n---';
+    }
+
+    function buildFirstPrompt() {
+      var name = ans.project_name || project.title;
+      var goal = ans.core_goal || '';
+      var platform = ans.platform_type || '';
+      var techStack = platform === '微信小程序' ? '微信小程序原生开发'
+        : platform === 'APP' ? '待确认（建议先明确 iOS/Android/跨平台）'
+        : '纯 HTML + CSS + JavaScript，无框架';
+      return '我要开始做一个新项目，请帮我执行第一个任务。\n\n' +
+        '项目名称：' + name + '\n' +
+        (goal ? '项目简介：' + goal + '\n' : '') +
+        '技术栈：' + techStack + '\n\n' +
+        '任务：task01 - 项目初始化\n\n' +
+        '目标：创建项目基础结构\n\n' +
+        '步骤：\n' +
+        '1. 创建项目文件夹\n' +
+        '2. 创建基础文件：index.html, css/style.css, js/main.js\n' +
+        '3. 搭建基础 HTML 结构（头部、主体、底部）\n' +
+        '4. 写一个最简单的首页，能在浏览器打开看到内容\n' +
+        '5. 初始化 Git 仓库，完成第一次 commit\n\n' +
+        '完成标志：\n' +
+        '- 双击 index.html 能在浏览器看到首页\n' +
+        '- Git 仓库已初始化，第一次 commit 完成\n\n' +
+        '请开始执行。';
+    }
+
+    /* ===== 手风琴数据 ===== */
+    var GUIDES = [
+      {
+        group: '基础知识',
+        items: [
+          {
+            title: '什么是命令行（CLI）？',
+            body: '命令行（CLI，Command Line Interface）就是一个纯文字的操作界面——没有按钮可以点，你通过输入文字命令来控制电脑。\n\n在不同系统上它叫不同的名字：\n- Windows：PowerShell（推荐）或 CMD（命令提示符）\n- Mac：终端（Terminal）\n- Linux：终端（Terminal）\n\n怎么打开：\n- Windows：按 Win 键，输入"PowerShell"，回车\n- Mac：按 Cmd+空格，输入"Terminal"，回车\n\n你只需要掌握几个最基础的命令：\n- cd 文件夹名：进入某个文件夹（比如 cd Desktop 就是进入桌面）\n- cd ..：退回上一层文件夹\n- dir（Windows）或 ls（Mac/Linux）：查看当前文件夹里有什么文件\n- 上下箭头键：翻看之前输入过的命令\n\n为什么需要它：\nClaude Code 等 AI 编程工具运行在命令行里。你不需要精通命令行，只需要会打开它、进入项目文件夹、输入一条启动命令就够了。剩下的交给 AI。\n\n举个例子，整个操作可能就是这三步：\n1. 打开 PowerShell\n2. 输入：cd C:\\Users\\你的用户名\\你的项目文件夹\n3. 输入：claude\n然后你就进入了 Claude Code，可以开始跟 AI 对话了。'
+          },
+          {
+            title: '什么是 VS Code？需要装吗？',
+            body: 'VS Code（Visual Studio Code）是一个免费的代码编辑器，由微软出品。你可以把它理解为一个"高级记事本"——专门用来查看和编辑代码文件的。\n\n下载地址：https://code.visualstudio.com\n\n它能帮你做什么：\n- 打开整个项目文件夹，一目了然地看到所有文件\n- 代码文件会有语法高亮（不同类型的内容用不同颜色显示），方便阅读\n- 内置终端（命令行），不用另外打开 PowerShell\n- 可以直接在里面编辑文件，比如改个文字、调个颜色\n\n需要装吗：\n- 如果你用 Cursor 或 TRAE：不需要装 VS Code，它们本身就是类似的编辑器\n- 如果你用 Claude Code（命令行工具）：强烈建议装一个 VS Code，用来查看项目文件和检查 AI 生成的代码\n- 如果你什么都还没装：先装 VS Code，它是最基础的工具\n\n安装后的第一件事：\n1. 打开 VS Code\n2. 点击左上角"文件" → "打开文件夹"\n3. 选择你的项目文件夹\n4. 左侧就能看到所有文件了'
+          }
+        ]
+      },
+      {
+        group: 'AI 编程工具',
+        items: [
+          {
+            title: '如何用 Claude Code 执行任务',
+            body: 'Claude Code 是目前最强的 AI 编程工具之一，在命令行中运行。它能自主读写文件、运行代码、调试错误，像一个真正的程序员搭档。\n\n前置条件：\n- 需要 Claude Pro 或 Max 订阅（claude.ai 付费）\n- 需要安装 Node.js（下载地址：https://nodejs.org，选 LTS 版本）\n\n安装步骤：\n1. 安装 Node.js 后，打开 PowerShell（Windows）或终端（Mac）\n2. 输入：npm install -g @anthropic-ai/claude-code\n3. 等待安装完成\n\n开始使用：\n1. 在 PowerShell 中进入你的项目文件夹：cd C:\\Users\\你的用户名\\你的项目文件夹\n2. 输入：claude\n3. 首次使用会弹出浏览器让你登录 Claude 账号，登录即可\n4. 登录成功后，你就进入了 Claude Code 的对话界面\n5. 把上面生成的「首轮开发 Prompt」粘贴进去，回车\n6. Claude Code 会自动创建文件、写代码、调试\n7. 完成后检查结果，有问题直接告诉它，它会修复\n\n高效技巧：\n- 启动时加 --dangerously-skip-permissions 可以跳过反复确认，全自动执行\n- 每完成一个 task，直接说"请读取 task02.md 执行任务"即可继续下一个\n- 遇到问题可以截图或复制错误信息给它'
+          },
+          {
+            title: '如何用 Cursor 执行任务',
+            body: 'Cursor 是一个带 AI 的代码编辑器，有图形界面，不需要用命令行，更适合不熟悉终端的用户。\n\n下载地址：https://cursor.com\n\n安装后使用：\n1. 打开 Cursor\n2. 点击"打开文件夹"，选择你的项目文件夹\n3. 按 Ctrl+L（Mac 用 Cmd+L）打开 AI 对话面板\n4. 把「首轮开发 Prompt」粘贴到对话框，回车\n5. Cursor 会生成代码并显示修改预览\n6. 确认后点"Apply"应用修改\n7. 在内置终端中测试效果\n\n适合谁：\n- 不想用命令行的人\n- 想看到代码修改对比（哪里加了什么、改了什么）的人\n- 想要图形界面操作的人'
+          },
+          {
+            title: '如何用 TRAE 执行任务',
+            body: 'TRAE 是字节跳动出品的 AI 编辑器，国内访问友好，中文支持好。\n\n下载地址：https://trae.ai\n\n安装后使用：\n1. 打开 TRAE，导入你的项目文件夹\n2. 使用内置 AI 功能开始对话\n3. 把「首轮开发 Prompt」粘贴到 AI 对话中\n4. TRAE 会帮你生成和修改代码\n5. 检查结果，有问题继续对话修复\n\n适合谁：\n- 在中国大陆、网络环境受限的用户\n- 想用中文交互的用户\n- 习惯图形界面操作的用户'
+          },
+          {
+            title: '我还是不知道怎么开始，怎么办？',
+            body: '别担心，你可以：\n\n1. 先把设计书和任务清单保存好（用导出功能下载 Markdown 文件备份）\n2. 带着这些文档去问任何一个 AI 大模型："我是零基础，有这份设计书和任务清单，请一步步教我怎么开始开发"\n3. AI 会根据你的具体情况给出更详细的步骤指导\n\n推荐的起步路径：\n- 完全零基础、怕命令行 → 先装 Cursor 或 TRAE（图形界面）\n- 愿意学一点命令行 → 装 Claude Code（能力最强）\n- 不管用哪个工具，第一步都是：装工具 → 打开项目文件夹 → 粘贴 prompt → 开始\n\n记住：你不需要懂代码，你只需要会粘贴 prompt 和验证结果。'
+          }
+        ]
+      }
+    ];
+
+    /* ===== AI 链接 HTML ===== */
+    var AI_LINKS_HTML =
+      '<div class="ai-links-wrap">' +
+        '<div class="ai-links-title">打开 AI 平台，粘贴提示词开始生成</div>' +
+        '<div class="ai-links">' +
+          '<a href="https://claude.ai" target="_blank" rel="noopener" class="ai-link-btn">Claude</a>' +
+          '<a href="https://chatgpt.com" target="_blank" rel="noopener" class="ai-link-btn">ChatGPT</a>' +
+          '<a href="https://www.doubao.com" target="_blank" rel="noopener" class="ai-link-btn">豆包</a>' +
+          '<a href="https://kimi.moonshot.cn" target="_blank" rel="noopener" class="ai-link-btn">Kimi</a>' +
+          '<a href="https://tongyi.aliyun.com" target="_blank" rel="noopener" class="ai-link-btn">通义千问</a>' +
+          '<a href="https://chat.deepseek.com" target="_blank" rel="noopener" class="ai-link-btn">DeepSeek</a>' +
+        '</div>' +
+      '</div>';
+
+    /* ===== 渲染手风琴 ===== */
+    function renderAccordion() {
+      var html = '<div class="accordion-list">';
+      GUIDES.forEach(function (grp) {
+        html += '<div class="accordion-group-label">' + grp.group + '</div>';
+        grp.items.forEach(function (item, idx) {
+          var id = 'acc-' + grp.group.replace(/\s+/g,'') + idx;
+          html +=
+            '<div class="accordion-item" id="' + id + '">' +
+              '<button class="accordion-header" onclick="toggleAcc(\'' + id + '\')">' +
+                esc(item.title) +
+                '<span class="acc-icon">+</span>' +
+              '</button>' +
+              '<div class="accordion-body"><pre>' + esc(item.body) + '</pre></div>' +
+            '</div>';
+        });
+      });
+      html += '</div>';
+      return html;
+    }
+
+    /* ===== 渲染页面 ===== */
+    var savedTaskList = taskPlan.task_list || '';
+    var savedFirstPrompt = taskPlan.first_prompt || '';
+
+    content.innerHTML =
+      /* 标题 */
+      '<div class="page-header">' +
+        '<h1>把设计书拆解成可执行的任务</h1>' +
+        '<p>用 AI 把设计书拆成一步步的开发任务，每个任务都可以直接交给 AI 编程工具执行。</p>' +
+      '</div>' +
+
+      /* 项目信息栏 */
+      '<div class="project-bar">' +
+        '<div class="project-bar-name">' + esc(ans.project_name || project.title) + '</div>' +
+        '<span class="stage-badge">已生成设计书</span>' +
+        '<a href="design.html?id=' + projectId + '" class="project-bar-link">← 返回设计书</a>' +
+      '</div>' +
+
+      /* 区域一：任务拆解提示词 */
+      '<div class="section-card">' +
+        '<h2>第一步：用 AI 生成任务拆解</h2>' +
+        '<p class="section-desc">把设计书内容和下面的提示词一起发给 AI，让它帮你拆解成具体任务。</p>' +
+        '<button class="btn-primary" onclick="genTaskPrompt()" style="width:auto;">生成任务拆解提示词</button>' +
+        '<div class="prompt-box" id="pbox-task">' +
+          '<pre class="prompt-text" id="ptext-task"></pre>' +
+          '<button class="btn-copy" id="pcopy-task" onclick="copyPrompt(\'task\')">复制</button>' +
+        '</div>' +
+        '<div class="notice-box">注意：生成提示词时会自动包含你的设计书内容。如果你的设计书很长，建议使用支持长文本的 AI（如 Claude、Kimi）。</div>' +
+        AI_LINKS_HTML +
+      '</div>' +
+
+      /* 区域二：粘贴任务清单 */
+      '<div class="section-card">' +
+        '<h2>第二步：把 AI 生成的任务清单粘贴到这里</h2>' +
+        '<textarea class="task-input" id="ta-tasklist" placeholder="把 AI 生成的任务拆解结果粘贴到这里...">' + esc(savedTaskList) + '</textarea>' +
+        '<button class="btn-secondary" onclick="saveTaskList()" style="width:auto;">保存任务清单</button>' +
+      '</div>' +
+
+      /* 区域三：首轮开发 Prompt */
+      '<div class="section-card">' +
+        '<h2>第三步：生成首轮开发 Prompt</h2>' +
+        '<p class="section-desc">这段 prompt 可以直接复制给 AI 编程工具（如 Claude Code、Cursor、TRAE），让它开始执行第一个任务。</p>' +
+        '<button class="btn-primary" onclick="genFirstPrompt()" style="width:auto;">生成首轮开发 Prompt</button>' +
+        '<div class="prompt-box' + (savedFirstPrompt ? ' visible' : '') + '" id="pbox-first">' +
+          '<pre class="prompt-text" id="ptext-first">' + esc(savedFirstPrompt || buildFirstPrompt()) + '</pre>' +
+          '<button class="btn-copy" id="pcopy-first" onclick="copyPrompt(\'first\')">复制</button>' +
+        '</div>' +
+      '</div>' +
+
+      /* 区域四：开发实战指南 */
+      '<div class="section-card">' +
+        '<h2>第四步：开始实战开发</h2>' +
+        '<p class="section-desc">现在你有了任务清单和开发 prompt，下一步是打开 AI 编程工具开始干活。如果你不熟悉下面提到的工具，先看前两个基础介绍。</p>' +
+        renderAccordion() +
+      '</div>' +
+
+      /* 底部操作栏 */
+      '<div class="actions-bar">' +
+        '<button class="btn-secondary" onclick="exportAll()">导出全部内容</button>' +
+        '<button class="btn-primary" onclick="markComplete()">保存并标记完成</button>' +
+      '</div>';
+
+    /* ===== 交互函数 ===== */
+    window.genTaskPrompt = function () {
+      var el = document.getElementById('ptext-task');
+      el.textContent = buildTaskPrompt();
+      var box = document.getElementById('pbox-task');
+      box.classList.add('visible');
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.genFirstPrompt = function () {
+      var text = buildFirstPrompt();
+      document.getElementById('ptext-first').textContent = text;
+      var box = document.getElementById('pbox-first');
+      box.classList.add('visible');
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.copyPrompt = function (key) {
+      var textEl = document.getElementById('ptext-' + key);
+      var btn = document.getElementById('pcopy-' + key);
+      var text = textEl.textContent;
+      function markCopied() {
+        btn.textContent = '已复制 ✓'; btn.classList.add('copied');
+        setTimeout(function () { btn.textContent = '复制'; btn.classList.remove('copied'); }, 2000);
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(markCopied).catch(fb);
+      } else { fb(); }
+      function fb() {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta); markCopied();
+      }
+    };
+
+    window.saveTaskList = function () {
+      var val = document.getElementById('ta-tasklist').value;
+      updateProject(projectId, { task_plan: Object.assign({}, taskPlan, { task_list: val }) });
+      taskPlan.task_list = val;
+      showToast('已保存 ✓');
+    };
+
+    window.toggleAcc = function (id) {
+      var item = document.getElementById(id);
+      var isOpen = item.classList.contains('open');
+      document.querySelectorAll('.accordion-item.open').forEach(function (el) { el.classList.remove('open'); });
+      if (!isOpen) item.classList.add('open');
+    };
+
+    window.exportAll = function () {
+      var taskListVal = document.getElementById('ta-tasklist').value;
+      var firstPromptVal = document.getElementById('ptext-first').textContent || buildFirstPrompt();
+      var name = ans.project_name || project.title;
+      var lines = [
+        '# ' + name + ' — 任务拆解\n',
+        '## 项目信息\n',
+        '- 项目名称：' + name,
+        ans.core_goal ? '- 核心目标：' + ans.core_goal : '',
+        ans.platform_type ? '- 平台形态：' + ans.platform_type : '',
+        ans.mvp_scope ? '- MVP 范围：' + ans.mvp_scope : '',
+        '',
+        '## 任务清单\n',
+        taskListVal || '（暂未填写）',
+        '',
+        '## 首轮开发 Prompt\n',
+        '```',
+        firstPromptVal,
+        '```',
+        '',
+        '## 开发工具\n',
+        '- Claude Code：https://claude.ai（需 Claude Pro/Max 订阅）',
+        '- Cursor：https://cursor.com（图形界面，适合初学者）',
+        '- TRAE：https://trae.ai（字节出品，国内友好）',
+        '',
+        '---',
+        '由 AI 项目教练生成 · builder.zhexueyuan.com'
+      ].filter(function (l) { return l !== undefined && l !== null; }).join('\n');
+
+      var blob = new Blob([lines], { type: 'text/markdown' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = name + '-任务拆解-' + todayStr() + '.md';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    window.markComplete = function () {
+      var taskListVal = document.getElementById('ta-tasklist').value;
+      var firstPromptVal = buildFirstPrompt();
+      updateProject(projectId, {
+        stage: 'tasks',
+        task_plan: { task_list: taskListVal, first_prompt: firstPromptVal }
+      });
+      document.getElementById('celebrate-overlay').style.display = 'flex';
+    };
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(function () { t.classList.remove('show'); }, 2200);
+    }
+
+  })();
+  </script>
 </body>
 </html>
