@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 项目教练 — 把软件想法变成可执行方案</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== Hero ===== */
+    .hero {
+      padding: 100px 20px 80px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(0, 229, 255, 0.12);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      margin-bottom: 24px;
+      letter-spacing: 0.3px;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 560px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-actions .btn-primary {
+      font-size: 16px;
+      padding: 14px 36px;
+    }
+
+    .hero-actions .btn-secondary {
+      font-size: 16px;
+      padding: 14px 36px;
+    }
+
+    /* ===== 通用 Section ===== */
+    section {
+      padding: 80px 20px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 48px;
+      letter-spacing: -0.3px;
+    }
+
+    /* ===== 价值卡片 ===== */
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .value-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 28px 24px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .value-card:hover {
+      border-color: rgba(0, 229, 255, 0.3);
+      transform: translateY(-3px);
+    }
+
+    .value-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+
+    .value-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .value-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ===== 三步流程 ===== */
+    .how-section {
+      background: var(--bg-secondary);
+    }
+
+    .steps-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .step {
+      flex: 1;
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 14px;
+    }
+
+    .step h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .step-arrow {
+      font-size: 22px;
+      color: var(--border);
+      padding-top: 10px;
+      flex-shrink: 0;
+    }
+
+    /* ===== 成果预览 ===== */
+    .example-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .example-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .example-card:hover {
+      border-color: rgba(124, 77, 255, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .example-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+
+    .tag-live {
+      background: rgba(0, 230, 118, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(0, 230, 118, 0.25);
+    }
+
+    .tag-demo {
+      background: rgba(124, 77, 255, 0.12);
+      color: var(--accent-purple);
+      border: 1px solid rgba(124, 77, 255, 0.25);
+    }
+
+    .example-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .example-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .example-card .btn-secondary {
+      font-size: 13px;
+      padding: 8px 16px;
+      width: 100%;
+    }
+
+    /* ===== FAQ ===== */
+    .faq-section {
+      background: var(--bg-secondary);
+    }
+
+    .faq-list {
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .faq-item {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+    }
+
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      text-align: left;
+      gap: 12px;
+      transition: color 0.2s;
+    }
+
+    .faq-question:hover {
+      color: var(--accent);
+    }
+
+    .faq-icon {
+      font-size: 18px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+      transition: transform 0.3s;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+      color: var(--accent);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      padding: 0 20px;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 200px;
+      padding: 0 20px 18px;
+    }
+
+    .faq-answer p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .hero {
+        padding: 80px 20px 60px;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+      }
+
+      .hero-sub {
+        font-size: 15px;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .value-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .steps-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .step-arrow {
+        transform: rotate(90deg);
+        padding-top: 0;
+      }
+
+      .example-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="page-body">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="container">
+        <div class="hero-badge">零基础用户的 AI 项目导航系统</div>
+        <h1>把你的软件想法，变成可执行的项目方案</h1>
+        <p class="hero-sub">不需要会写代码，不需要装任何工具。告诉我你的想法，AI 带你一步步完成项目定义、生成设计书、拆解开发任务。</p>
+        <div class="hero-actions">
+          <a href="idea.html" class="btn-primary">开始做项目</a>
+          <button class="btn-secondary" onclick="alert('路线选择即将上线')">我还没装工具，先选路线</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 价值卡片 -->
+    <section>
+      <div class="container">
+        <div class="value-grid">
+          <div class="value-card">
+            <div class="value-icon">💡</div>
+            <h3>把想法变清晰</h3>
+            <p>AI 像项目经理一样帮你梳理需求，把模糊的想法变成清晰的项目定义</p>
+          </div>
+          <div class="value-card">
+            <div class="value-icon">📋</div>
+            <h3>生成专业设计书</h3>
+            <p>自动输出三个版本的设计书：通俗版、标准产品版、AI编程版</p>
+          </div>
+          <div class="value-card">
+            <div class="value-icon">🔧</div>
+            <h3>拆解成可执行任务</h3>
+            <p>生成分阶段的任务清单和开发 prompt，直接交给 AI 编程工具执行</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 三步流程 -->
+    <section class="how-section">
+      <div class="container">
+        <h2 class="section-title">三步完成，从想法到方案</h2>
+        <div class="steps-row">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>输入你的想法</h3>
+            <p>用大白话描述你想做什么软件</p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>AI 帮你理清需求</h3>
+            <p>多轮对话，像项目经理一样追问细节</p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>生成方案，开始干</h3>
+            <p>设计书 + 任务清单 + 开发 prompt，一键导出</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 成果预览 -->
+    <section>
+      <div class="container">
+        <h2 class="section-title">看看别人用这个工具做出了什么</h2>
+        <div class="example-grid">
+          <div class="example-card">
+            <span class="example-tag tag-live">已上线</span>
+            <h3>高考择业助手</h3>
+            <p>帮高考生和家长选择专业方向</p>
+            <button class="btn-secondary" onclick="alert('即将上线')">查看设计书示例</button>
+          </div>
+          <div class="example-card">
+            <span class="example-tag tag-demo">示例</span>
+            <h3>读书笔记整理工具</h3>
+            <p>自动整理和归纳读书摘录</p>
+            <button class="btn-secondary" onclick="alert('即将上线')">查看设计书示例</button>
+          </div>
+          <div class="example-card">
+            <span class="example-tag tag-demo">示例</span>
+            <h3>餐厅点餐小程序</h3>
+            <p>扫码点餐和后厨管理</p>
+            <button class="btn-secondary" onclick="alert('即将上线')">查看设计书示例</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <div class="container">
+        <h2 class="section-title">常见问题</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question">
+              我完全不懂编程，能用吗？
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>完全可以。这个工具的目标就是帮零基础用户把想法变成方案。你只需要用大白话描述你的想法，AI 会帮你处理所有技术细节。</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">
+              生成的设计书靠谱吗？
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>设计书由 AI 根据你的需求生成，质量取决于需求澄清的充分程度。建议在澄清阶段多和 AI 对话，把需求想清楚。</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">
+              需要付费吗？
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>工具本身免费使用。你需要自备一个 DeepSeek API Key（注册即送额度），用于驱动 AI 对话。</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">
+              我的数据安全吗？
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>所有数据都存储在你自己的浏览器中，不会上传到任何服务器。但清除浏览器数据会导致记录丢失，建议定期使用导出功能备份。</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">
+              生成设计书之后怎么办？
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>你可以把设计书和任务清单交给 AI 编程工具（如 Claude Code、Cursor、TRAE 等）执行。工具会生成可直接使用的开发 prompt。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /page-body -->
+
+  <div id="footer-mount"></div>
+
+  <script src="js/nav.js"></script>
+  <script src="js/legal.js"></script>
+  <script>
+    // FAQ 手风琴
+    document.querySelectorAll('.faq-question').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var item = btn.closest('.faq-item');
+        var isOpen = item.classList.contains('open');
+        // 关闭所有
+        document.querySelectorAll('.faq-item').forEach(function (el) {
+          el.classList.remove('open');
+        });
+        // 如果原本是关闭的，则打开
+        if (!isOpen) {
+          item.classList.add('open');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
