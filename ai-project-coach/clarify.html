@@ -6,8 +6,19 @@
   <title>需求澄清 — AI 项目教练</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
+    /* ===== 面包屑 ===== */
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+    .breadcrumb a { color: var(--text-secondary); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb span { margin: 0 5px; }
+
+    /* ===== 页面标题 ===== */
     .page-header {
-      margin-bottom: 36px;
+      margin-bottom: 32px;
     }
     .page-header h1 {
       font-size: 26px;
@@ -19,85 +30,302 @@
       font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.7;
-      max-width: 560px;
+      max-width: 580px;
     }
 
-    .coming-badge {
-      display: inline-block;
-      background: rgba(255, 215, 64, 0.1);
-      color: var(--warning);
-      border: 1px solid rgba(255, 215, 64, 0.25);
-      font-size: 12px;
-      font-weight: 600;
-      padding: 3px 12px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-    }
-
+    /* ===== 项目信息卡 ===== */
     .project-info-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .project-info-card .proj-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .project-info-card .proj-name {
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .project-info-card .proj-edit {
+      font-size: 13px;
+    }
+    .project-info-card .proj-idea {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+
+    /* ===== 提示词区 ===== */
+    .prompt-section {
       background: var(--bg-secondary);
       border: 1px solid var(--border);
       border-radius: var(--radius-card);
       padding: 24px;
       margin-bottom: 32px;
     }
-    .project-info-card .project-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
+    .prompt-section h2 {
+      font-size: 16px;
+      font-weight: 700;
       margin-bottom: 6px;
     }
-    .project-info-card .project-name {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-    .project-info-card .idea-label {
-      font-size: 11px;
-      font-weight: 600;
+    .prompt-section .prompt-desc {
+      font-size: 13px;
       color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .prompt-box {
+      display: none;
+      position: relative;
+      margin-top: 18px;
+    }
+    .prompt-box.visible { display: block; }
+    .prompt-text {
+      background: #0d0d16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 16px 16px 16px;
+      font-family: var(--font-code);
+      font-size: 13px;
+      line-height: 1.7;
+      color: #cdd6f4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 80px;
+    }
+    .btn-copy {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-family: var(--font-main);
+      font-weight: 600;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-copy:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-copy.copied { color: var(--success); border-color: var(--success); }
+
+    /* AI 平台链接 */
+    .ai-links-section {
+      margin-top: 20px;
+    }
+    .ai-links-title {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+    .ai-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .ai-link-btn {
+      display: inline-block;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .ai-link-btn:hover { color: var(--accent); border-color: rgba(0,229,255,0.4); }
+
+    /* ===== 分割线 ===== */
+    .divider-text {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 32px 0;
+      position: relative;
+    }
+    .divider-text::before,
+    .divider-text::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 28%;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider-text::before { left: 0; }
+    .divider-text::after { right: 0; }
+
+    /* ===== 表单 ===== */
+    .form-section {
+      margin-bottom: 32px;
+    }
+    .form-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 0.8px;
-      margin-bottom: 8px;
+      margin-bottom: 18px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
     }
-    .project-info-card .idea-text {
+    .form-group {
+      margin-bottom: 22px;
+    }
+    .form-label {
+      display: block;
       font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 7px;
+      color: var(--text-primary);
+    }
+    .form-label .required-mark {
+      color: var(--accent);
+      margin-left: 3px;
+    }
+    textarea.input {
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    /* 单选按钮组 */
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .radio-option {
+      display: none;
+    }
+    .radio-label {
+      display: inline-block;
+      background: var(--bg-tertiary);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 16px;
+      font-size: 14px;
+      font-weight: 500;
       color: var(--text-secondary);
-      line-height: 1.75;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .radio-option:checked + .radio-label {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,229,255,0.07);
+    }
+    .radio-label:hover {
+      border-color: rgba(0,229,255,0.3);
+      color: var(--text-primary);
     }
 
-    .error-card {
-      background: rgba(255, 82, 82, 0.08);
-      border: 1px solid rgba(255, 82, 82, 0.25);
-      border-radius: var(--radius-card);
-      padding: 24px;
-      text-align: center;
+    /* ===== 进度条 ===== */
+    .progress-section {
+      margin-bottom: 28px;
     }
-    .error-card p {
-      color: var(--danger);
-      font-size: 14px;
-      margin-bottom: 16px;
+    .progress-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
     }
+    .progress-bar-track {
+      height: 6px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s, background-color 0.3s;
+      background: var(--text-secondary);
+    }
+    .progress-bar-fill.mid { background: var(--accent); }
+    .progress-bar-fill.high { background: var(--success); }
 
-    .page-links {
+    /* ===== 操作按钮 ===== */
+    .form-actions {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
     }
-    .page-links a {
+    .form-actions .btn-primary,
+    .form-actions .btn-secondary {
+      flex: 1;
+      min-width: 160px;
+    }
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .required-hint {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 10px;
+      display: none;
+    }
+    .required-hint.show { display: block; }
+
+    /* ===== 错误卡 ===== */
+    .error-card {
+      background: rgba(255,82,82,0.08);
+      border: 1px solid rgba(255,82,82,0.25);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      text-align: center;
+    }
+    .error-card p { color: var(--danger); font-size: 14px; margin-bottom: 16px; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 24px;
       font-size: 14px;
+      color: var(--success);
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
 
     @media (max-width: 768px) {
-      .page-links {
-        flex-direction: column;
-      }
-      .page-links a {
-        width: 100%;
-        text-align: center;
-      }
+      .form-actions { flex-direction: column; }
+      .form-actions .btn-primary,
+      .form-actions .btn-secondary { min-width: unset; }
+      .divider-text::before,
+      .divider-text::after { width: 18%; }
     }
   </style>
 </head>
@@ -105,7 +333,7 @@
   <div id="nav-mount"></div>
 
   <div class="page-body">
-    <div class="container" style="padding-top: 48px; padding-bottom: 80px; max-width: 680px;">
+    <div class="container" style="padding-top: 48px; padding-bottom: 80px; max-width: 720px;">
 
       <!-- 返回导航 -->
       <div class="page-nav">
@@ -113,21 +341,21 @@
         <a href="javascript:history.back()" class="nav-link">← 返回上一页</a>
       </div>
 
-      <!-- 页面标题 -->
-      <div class="page-header">
-        <div class="coming-badge">即将上线</div>
-        <h1>需求澄清（即将上线）</h1>
-        <p>这个环节会引导你把模糊的想法变成清晰的项目定义。正在开发中，敬请期待。</p>
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="index.html">首页</a><span>›</span>
+        <a href="workspace.html">工作台</a><span>›</span>
+        <span>需求澄清</span>
       </div>
 
-      <!-- 项目信息卡 / 错误提示 -->
-      <div id="project-info-container"></div>
-
-      <!-- 底部链接 -->
-      <div class="page-links" id="page-links"></div>
+      <!-- 主内容（JS 渲染） -->
+      <div id="page-content"></div>
 
     </div>
   </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">已保存 ✓</div>
 
   <div id="footer-mount"></div>
 
@@ -135,49 +363,367 @@
   <script src="js/nav.js"></script>
   <script src="js/legal.js"></script>
   <script>
-    (function () {
-      var params = new URLSearchParams(window.location.search);
-      var id = params.get('id');
-      var infoContainer = document.getElementById('project-info-container');
-      var linksContainer = document.getElementById('page-links');
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var projectId = params.get('id');
+    var content = document.getElementById('page-content');
 
-      if (!id) {
-        infoContainer.innerHTML =
-          '<div class="error-card"><p>未找到项目，请从工作台选择项目继续。</p></div>';
-        linksContainer.innerHTML =
-          '<a href="workspace.html" class="btn-secondary" style="width:auto;">返回工作台</a>';
-        return;
+    // ===== 错误状态 =====
+    function showError(msg) {
+      content.innerHTML =
+        '<div class="error-card"><p>' + msg + '</p>' +
+        '<a href="workspace.html" class="btn-secondary" style="width:auto;display:inline-block;">返回工作台</a></div>';
+    }
+
+    if (!projectId) { showError('未找到项目，请从工作台选择项目继续。'); return; }
+    var project = getProject(projectId);
+    if (!project) { showError('找不到该项目，可能已被删除。'); return; }
+
+    var ans = project.clarify_answers || {};
+
+    // ===== 提示词模板 =====
+    function buildPrompt() {
+      return '我想做一个软件项目，请你扮演一个专业的项目经理，通过提问帮我把想法理清楚。\n\n我的想法是：\n"""\n' +
+        project.idea +
+        '\n"""\n\n请你一步步问我以下问题（每次只问 1-2 个，等我回答后再问下一个）：\n\n' +
+        '1. 这个软件核心要解决什么问题？\n' +
+        '2. 目标用户是谁？他们在什么场景下会使用？\n' +
+        '3. 用户需要输入什么信息？系统给出什么结果？\n' +
+        '4. 第一版必须有哪些功能？哪些可以以后再做？\n' +
+        '5. 打算做成网页、小程序还是 APP？\n' +
+        '6. 需不需要用户登录？需不需要付费功能？需不需要后台管理？\n' +
+        '7. 数据从哪里来？\n' +
+        '8. 第一版的范围是什么？做到什么程度算完成？\n\n' +
+        '请用大白话跟我对话，不要用技术术语。每次我回答后，帮我总结一下当前已经确定的内容，然后继续问下一个问题。\n\n' +
+        '当所有问题都问完后，请帮我整理一份结构化的项目定义，包含以下字段：\n' +
+        '- 项目名称\n- 核心目标\n- 目标用户\n- 使用场景\n- 输入内容\n- 输出结果\n' +
+        '- 核心功能\n- 非核心功能\n- 平台形态\n- 是否需要登录\n- 是否需要支付\n' +
+        '- 是否需要后台\n- 数据来源\n- MVP 范围';
+    }
+
+    // ===== 渲染页面 =====
+    content.innerHTML =
+      /* 标题区 */
+      '<div class="page-header">' +
+        '<h1>让想法变清晰</h1>' +
+        '<p>回答下面的问题，把你的模糊想法变成清晰的项目定义。可以自己思考填写，也可以用我们生成的提示词去问 AI。</p>' +
+      '</div>' +
+
+      /* 项目信息卡 */
+      '<div class="project-info-card">' +
+        '<div class="proj-meta">' +
+          '<div class="proj-name">' + esc(project.title) + '</div>' +
+          '<a href="idea.html?id=' + projectId + '" class="proj-edit">编辑想法 →</a>' +
+        '</div>' +
+        '<div class="proj-idea">' + esc(project.idea) + '</div>' +
+      '</div>' +
+
+      /* 提示词区 */
+      '<div class="prompt-section">' +
+        '<h2>用 AI 帮你澄清需求</h2>' +
+        '<p class="prompt-desc">点击下方按钮生成一段提示词，复制到你常用的 AI 大模型中对话，AI 会像项目经理一样帮你理清每个细节。对话完成后，回到这里把结果填入下方表单。</p>' +
+        '<button class="btn-primary" id="btn-gen-prompt" style="width:auto;">生成需求澄清提示词</button>' +
+        '<div class="prompt-box" id="prompt-box">' +
+          '<pre class="prompt-text" id="prompt-text"></pre>' +
+          '<button class="btn-copy" id="btn-copy">复制</button>' +
+        '</div>' +
+        '<div class="ai-links-section">' +
+          '<div class="ai-links-title">打开你常用的 AI 平台，粘贴提示词开始对话</div>' +
+          '<div class="ai-links">' +
+            '<a href="https://claude.ai" target="_blank" rel="noopener" class="ai-link-btn">Claude</a>' +
+            '<a href="https://chatgpt.com" target="_blank" rel="noopener" class="ai-link-btn">ChatGPT</a>' +
+            '<a href="https://www.doubao.com" target="_blank" rel="noopener" class="ai-link-btn">豆包</a>' +
+            '<a href="https://kimi.moonshot.cn" target="_blank" rel="noopener" class="ai-link-btn">Kimi</a>' +
+            '<a href="https://tongyi.aliyun.com" target="_blank" rel="noopener" class="ai-link-btn">通义千问</a>' +
+            '<a href="https://chat.deepseek.com" target="_blank" rel="noopener" class="ai-link-btn">DeepSeek</a>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      /* 分割线 */
+      '<div class="divider-text">和 AI 聊完之后，把结果填入下面的表单：</div>' +
+
+      /* ===== 表单 ===== */
+      '<form id="clarify-form">' +
+
+        /* 第一组：基本定义 */
+        '<div class="form-section">' +
+          '<div class="form-section-title">第一组：基本定义</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-project-name">1. 项目名称 <span class="required-mark">*</span></label>' +
+            '<input type="text" id="f-project-name" class="input" placeholder="简短好记的名字" value="' + esc(ans.project_name || project.title) + '" />' +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-core-goal">2. 核心目标 <span class="required-mark">*</span></label>' +
+            '<textarea id="f-core-goal" class="input" rows="3" placeholder="这个软件要解决什么问题？比如：帮高考生快速找到适合自己的专业方向">' + esc(ans.core_goal || '') + '</textarea>' +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-target-users">3. 目标用户 <span class="required-mark">*</span></label>' +
+            '<textarea id="f-target-users" class="input" rows="2" placeholder="谁会用这个软件？比如：高考生和他们的家长">' + esc(ans.target_users || '') + '</textarea>' +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-use-cases">4. 使用场景</label>' +
+            '<textarea id="f-use-cases" class="input" rows="2" placeholder="用户在什么情况下会打开它？比如：高考填志愿前，纠结选什么专业的时候">' + esc(ans.use_cases || '') + '</textarea>' +
+          '</div>' +
+        '</div>' +
+
+        /* 第二组：功能定义 */
+        '<div class="form-section">' +
+          '<div class="form-section-title">第二组：功能定义</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-input-data">5. 输入内容</label>' +
+            '<textarea id="f-input-data" class="input" rows="2" placeholder="用户需要提供什么信息？比如：成绩、科目偏好、兴趣爱好">' + esc(ans.input_data || '') + '</textarea>' +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-output-result">6. 输出结果</label>' +
+            '<textarea id="f-output-result" class="input" rows="2" placeholder="系统给用户返回什么？比如：专业推荐排名 + 分析报告">' + esc(ans.output_result || '') + '</textarea>' +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-core-features">7. 核心功能（第一版必须有的）<span class="required-mark">*</span></label>' +
+            '<textarea id="f-core-features" class="input" rows="3" placeholder="列出最重要的功能，比如：&#10;1. 问卷评测&#10;2. 专业匹配推荐&#10;3. AI 分析报告">' + esc(ans.core_features || '') + '</textarea>' +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-non-core">8. 非核心功能（可以以后做的）</label>' +
+            '<textarea id="f-non-core" class="input" rows="2" placeholder="暂时不做但将来想加的，比如：分享功能、历史记录对比">' + esc(ans.non_core_features || '') + '</textarea>' +
+          '</div>' +
+        '</div>' +
+
+        /* 第三组：技术约束 */
+        '<div class="form-section">' +
+          '<div class="form-section-title">第三组：技术约束</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label">9. 平台形态 <span class="required-mark">*</span></label>' +
+            buildRadioGroup('platform_type', ['网页', '微信小程序', 'APP', '还没想好'], ans.platform_type) +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label">10. 是否需要用户登录 <span class="required-mark">*</span></label>' +
+            buildRadioGroup('need_login', ['需要', '不需要', '还没想好'], ans.need_login) +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label">11. 是否需要支付功能</label>' +
+            buildRadioGroup('need_payment', ['需要', '不需要', '还没想好'], ans.need_payment) +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label">12. 是否需要后台管理</label>' +
+            buildRadioGroup('need_admin', ['需要', '不需要', '还没想好'], ans.need_admin) +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-data-source">13. 数据来源</label>' +
+            '<textarea id="f-data-source" class="input" rows="2" placeholder="数据从哪来？比如：自己整理的专业数据库 + AI 实时生成">' + esc(ans.data_source || '') + '</textarea>' +
+          '</div>' +
+        '</div>' +
+
+        /* 第四组：范围收束 */
+        '<div class="form-section">' +
+          '<div class="form-section-title">第四组：范围收束</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-mvp-scope">14. MVP 范围（第一版做到什么程度）<span class="required-mark">*</span></label>' +
+            '<textarea id="f-mvp-scope" class="input" rows="3" placeholder="第一版只做什么？比如：先覆盖 50 个热门专业，只做网页版，暂不做用户登录">' + esc(ans.mvp_scope || '') + '</textarea>' +
+          '</div>' +
+
+          '<div class="form-group">' +
+            '<label class="form-label" for="f-tech-difficulty">15. 你觉得技术上最难的部分是什么？（选填）</label>' +
+            '<textarea id="f-tech-difficulty" class="input" rows="2" placeholder="如果你有感觉的话，比如：不知道数据从哪来、不知道怎么做推荐算法">' + esc(ans.tech_difficulty || '') + '</textarea>' +
+          '</div>' +
+        '</div>' +
+
+        /* 进度条 */
+        '<div class="progress-section">' +
+          '<div class="progress-label">' +
+            '<span id="progress-text">已填写 0/15 项</span>' +
+            '<span id="progress-pct">0%</span>' +
+          '</div>' +
+          '<div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>' +
+        '</div>' +
+
+        /* 操作按钮 */
+        '<div class="form-actions">' +
+          '<button type="button" class="btn-primary" id="btn-save-continue" disabled>保存并继续生成设计书</button>' +
+          '<button type="button" class="btn-secondary" id="btn-save-draft">保存草稿，稍后继续</button>' +
+        '</div>' +
+        '<p class="required-hint" id="required-hint">请至少完成标 * 的必填项（共 7 项）</p>' +
+
+      '</form>';
+
+    // ===== 辅助：构建单选组 =====
+    function buildRadioGroup(name, options, selected) {
+      return '<div class="radio-group">' + options.map(function (opt) {
+        var id = 'r-' + name + '-' + opt.replace(/\s+/g, '_');
+        var checked = (opt === selected) ? ' checked' : '';
+        return '<input type="radio" class="radio-option" name="' + name + '" id="' + id + '" value="' + opt + '"' + checked + '>' +
+          '<label class="radio-label" for="' + id + '">' + opt + '</label>';
+      }).join('') + '</div>';
+    }
+
+    // ===== 提示词生成 =====
+    document.getElementById('btn-gen-prompt').addEventListener('click', function () {
+      var box = document.getElementById('prompt-box');
+      var textEl = document.getElementById('prompt-text');
+      textEl.textContent = buildPrompt();
+      box.classList.add('visible');
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // ===== 复制按钮 =====
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      var text = document.getElementById('prompt-text').textContent;
+      var btn = this;
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = '已复制 ✓';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(function () {
+        // fallback
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        btn.textContent = '已复制 ✓';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+
+    // ===== 进度 & 校验 =====
+    var REQUIRED_FIELDS = ['f-project-name', 'f-core-goal', 'f-target-users', 'f-core-features', 'f-mvp-scope'];
+    var REQUIRED_RADIOS = ['platform_type', 'need_login'];
+    var ALL_TEXT_FIELDS = ['f-project-name', 'f-core-goal', 'f-target-users', 'f-use-cases',
+      'f-input-data', 'f-output-result', 'f-core-features', 'f-non-core',
+      'f-data-source', 'f-mvp-scope', 'f-tech-difficulty'];
+    var ALL_RADIO_NAMES = ['platform_type', 'need_login', 'need_payment', 'need_admin'];
+
+    function countFilled() {
+      var count = 0;
+      ALL_TEXT_FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && el.value.trim()) count++;
+      });
+      ALL_RADIO_NAMES.forEach(function (name) {
+        if (document.querySelector('input[name="' + name + '"]:checked')) count++;
+      });
+      return count;
+    }
+
+    function isRequiredFilled() {
+      var ok = true;
+      REQUIRED_FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el || !el.value.trim()) ok = false;
+      });
+      REQUIRED_RADIOS.forEach(function (name) {
+        if (!document.querySelector('input[name="' + name + '"]:checked')) ok = false;
+      });
+      return ok;
+    }
+
+    function updateProgress() {
+      var filled = countFilled();
+      var total = 15;
+      var pct = Math.round(filled / total * 100);
+      document.getElementById('progress-text').textContent = '已填写 ' + filled + '/' + total + ' 项';
+      document.getElementById('progress-pct').textContent = pct + '%';
+      var fill = document.getElementById('progress-fill');
+      fill.style.width = pct + '%';
+      fill.className = 'progress-bar-fill' + (pct >= 80 ? ' high' : pct >= 50 ? ' mid' : '');
+
+      var ready = isRequiredFilled();
+      document.getElementById('btn-save-continue').disabled = !ready;
+      document.getElementById('required-hint').classList.toggle('show', !ready && filled > 0);
+    }
+
+    // 绑定所有输入事件
+    ALL_TEXT_FIELDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', updateProgress);
+    });
+    document.getElementById('clarify-form').addEventListener('change', function (e) {
+      if (e.target.type === 'radio') updateProgress();
+    });
+
+    // 初始化
+    updateProgress();
+
+    // ===== 收集表单数据 =====
+    function collectAnswers() {
+      function radio(name) {
+        var el = document.querySelector('input[name="' + name + '"]:checked');
+        return el ? el.value : '';
       }
+      return {
+        project_name: document.getElementById('f-project-name').value.trim(),
+        core_goal: document.getElementById('f-core-goal').value.trim(),
+        target_users: document.getElementById('f-target-users').value.trim(),
+        use_cases: document.getElementById('f-use-cases').value.trim(),
+        input_data: document.getElementById('f-input-data').value.trim(),
+        output_result: document.getElementById('f-output-result').value.trim(),
+        core_features: document.getElementById('f-core-features').value.trim(),
+        non_core_features: document.getElementById('f-non-core').value.trim(),
+        platform_type: radio('platform_type'),
+        need_login: radio('need_login'),
+        need_payment: radio('need_payment'),
+        need_admin: radio('need_admin'),
+        data_source: document.getElementById('f-data-source').value.trim(),
+        mvp_scope: document.getElementById('f-mvp-scope').value.trim(),
+        tech_difficulty: document.getElementById('f-tech-difficulty').value.trim()
+      };
+    }
 
-      var project = getProject(id);
-      if (!project) {
-        infoContainer.innerHTML =
-          '<div class="error-card"><p>找不到该项目，可能已被删除。</p></div>';
-        linksContainer.innerHTML =
-          '<a href="workspace.html" class="btn-secondary" style="width:auto;">返回工作台</a>';
-        return;
-      }
+    // ===== 保存并继续 =====
+    document.getElementById('btn-save-continue').addEventListener('click', function () {
+      var answers = collectAnswers();
+      updateProject(projectId, { clarify_answers: answers, stage: 'clarify', title: answers.project_name || project.title });
+      window.location.href = 'design.html?id=' + projectId;
+    });
 
-      infoContainer.innerHTML =
-        '<div class="project-info-card">' +
-          '<div class="project-label">当前项目</div>' +
-          '<div class="project-name">' + escapeHtml(project.title) + '</div>' +
-          '<div class="idea-label">你的想法</div>' +
-          '<div class="idea-text">' + escapeHtml(project.idea) + '</div>' +
-        '</div>';
+    // ===== 保存草稿 =====
+    document.getElementById('btn-save-draft').addEventListener('click', function () {
+      var answers = collectAnswers();
+      updateProject(projectId, { clarify_answers: answers });
+      showToast('已保存 ✓');
+    });
 
-      linksContainer.innerHTML =
-        '<a href="workspace.html" class="btn-secondary" style="width:auto;">返回工作台</a>' +
-        '<a href="idea.html?id=' + id + '" class="btn-secondary" style="width:auto;">编辑想法</a>';
+    // ===== Toast =====
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(function () { t.classList.remove('show'); }, 2200);
+    }
 
-      function escapeHtml(str) {
-        return String(str)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }
-    })();
+    // ===== 工具函数 =====
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+  })();
   </script>
 </body>
 </html>
