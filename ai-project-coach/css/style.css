@@ -294,6 +294,26 @@ a:hover {
   max-width: 280px;
 }
 
+/* ===== 页面返回导航 ===== */
+.page-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+  flex-wrap: nowrap;
+}
+
+.page-nav .nav-link {
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.page-nav .nav-link:hover {
+  color: var(--accent);
+}
+
 /* ===== 页面主体偏移（固定导航栏补偿） ===== */
 .page-body {
   padding-top: 60px;
