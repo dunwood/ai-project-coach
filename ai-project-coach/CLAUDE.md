@@ -8,7 +8,8 @@ AI 项目教练
 
 ## 技术栈
 - 纯 HTML + CSS + JavaScript，无框架、无构建工具
-- AI 功能通过 DeepSeek API 在前端直接调用
+- 本站不直接调用任何 AI API，而是生成提示词模板供用户在站外大模型中使用
+- 提供各大模型的超链接入口方便用户跳转
 - 数据持久化使用 localStorage
 - 部署平台：Cloudflare Pages
 - 域名：builder.zhexueyuan.com

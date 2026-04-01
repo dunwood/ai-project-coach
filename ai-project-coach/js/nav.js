@@ -22,7 +22,7 @@
     footerMount.innerHTML = `
       <footer>
         <div class="footer-inner">
-          <span class="footer-text">AI 项目教练 · 哲学园出品 · 2026</span>
+          <span class="footer-text">AI 项目教练 · 哲学园出品 · 2026 · Copyright &copy;</span>
           <button class="footer-legal" id="open-legal-btn">用户服务与免责声明</button>
         </div>
       </footer>
