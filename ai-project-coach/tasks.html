@@ -339,6 +339,103 @@
       .accordion-body pre { white-space: pre; overflow-x: auto; }
       .prompt-text { padding-right: 16px; padding-bottom: 50px; }
     }
+
+    /* ===== 第三步子区域标题 ===== */
+    .subsection-header {
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+      margin: 24px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+    .subsection-sub {
+      font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.65;
+    }
+
+    /* ===== 路线卡片列表 ===== */
+    .route-cards-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .route-card {
+      background: var(--bg-primary); border: 1px solid var(--border);
+      border-radius: var(--radius-card); overflow: hidden; transition: border-color 0.2s;
+    }
+    .route-card:hover { border-color: rgba(0,229,255,0.25); }
+    .route-card.route-card-open { border-color: rgba(0,229,255,0.45); }
+    .route-card-head { padding: 18px 18px 14px; position: relative; }
+    .route-card-tag {
+      position: absolute; top: 14px; right: 14px;
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; letter-spacing: 0.3px;
+      background: rgba(0,229,255,0.1); color: var(--accent);
+      border: 1px solid rgba(0,229,255,0.25);
+    }
+    .route-card-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; padding-right: 90px; }
+    .route-card-summary { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.6; }
+    .route-card-meta { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .route-meta-item { font-size: 13px; color: var(--text-secondary); }
+    .route-meta-item strong { color: var(--text-primary); font-weight: 600; }
+    .route-difficulty { font-weight: 700; padding: 1px 8px; border-radius: 10px; font-size: 12px; }
+    .diff-easy  { background: rgba(0,230,118,0.12); color: var(--success); }
+    .diff-medium { background: rgba(255,215,64,0.12); color: var(--warning); }
+    .diff-hard  { background: rgba(255,82,82,0.12);  color: var(--danger); }
+    .btn-route-steps {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 14px; cursor: pointer;
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      font-family: var(--font-main); transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-route-steps:hover { color: var(--accent); border-color: rgba(0,229,255,0.4); }
+    .route-card-open .btn-route-steps { color: var(--accent); border-color: rgba(0,229,255,0.4); }
+    .btn-route-arrow {
+      display: inline-block; width: 0; height: 0;
+      border-left: 5px solid transparent; border-right: 5px solid transparent;
+      border-top: 7px solid currentColor; transition: transform 0.3s;
+    }
+    .route-card-open .btn-route-arrow { transform: rotate(180deg); }
+
+    /* ===== 安装步骤面板 ===== */
+    .route-steps-panel {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.45s ease;
+      border-top: 1px solid transparent;
+    }
+    .route-card-open .route-steps-panel { border-top-color: var(--border); }
+    .install-steps { padding: 20px 18px; display: flex; flex-direction: column; gap: 18px; }
+    .install-step { display: flex; gap: 14px; align-items: flex-start; }
+    .install-step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent); color: #0a0a0f;
+      font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .install-step-body { flex: 1; }
+    .install-step-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .install-step-content { font-size: 13px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 8px; }
+    .install-step-success { font-size: 13px; color: var(--success); font-weight: 600; margin-bottom: 8px; }
+    .btn-troubleshoot {
+      background: none; border: none; padding: 0; cursor: pointer;
+      font-size: 12px; color: var(--text-secondary); font-family: var(--font-main);
+      transition: color 0.2s; text-decoration: underline; text-decoration-style: dotted;
+    }
+    .btn-troubleshoot:hover { color: var(--text-primary); }
+    .troubleshoot-content {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s;
+      font-size: 12px; color: var(--text-secondary); line-height: 1.7; padding: 0;
+    }
+    .troubleshoot-content.open { max-height: 200px; padding-top: 6px; }
+    .route-complete-wrap {
+      padding: 14px 18px 18px; border-top: 1px dashed var(--border); margin-top: 4px;
+    }
+    .route-complete-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text-primary);
+    }
+    .route-complete-label input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .route-card-tag { position: static; display: inline-block; margin-bottom: 8px; }
+      .route-card-name { padding-right: 0; }
+    }
   </style>
 </head>
 <body>
@@ -378,6 +475,7 @@
 
   <div id="footer-mount"></div>
 
+  <script src="data/routes.js"></script>
   <script src="js/project.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/legal.js"></script>
@@ -456,14 +554,13 @@
       }
     ];
 
-    function renderAccordion() {
+    function renderAccordionGroup(groupName) {
       var html = '<div class="accordion-list">';
       GUIDES.forEach(function (grp) {
-        html += '<div class="accordion-group-label">' + grp.group + '</div>';
+        if (grp.group !== groupName) return;
         grp.items.forEach(function (item, idx) {
           var id = 'acc-' + grp.group.replace(/\s+/g,'') + idx;
           var title = item.title;
-          // 如果 title 已含 emoji 前缀就不重复加
           if (!title.match(/^[^\w\s]/)) {
             title = grp.emoji + ' ' + title;
           }
@@ -477,6 +574,70 @@
             '</div>';
         });
       });
+      html += '</div>';
+      return html;
+    }
+
+    function renderRouteCards(projId) {
+      if (typeof ROUTES === 'undefined') {
+        return '<p style="color:var(--text-secondary);font-size:14px;">路线数据加载失败，请刷新页面重试。</p>';
+      }
+      var savedProj = getProject(projId);
+      var savedRouteId = (savedProj && savedProj.route_id) || '';
+      var html = '<div class="route-cards-list">';
+      ROUTES.forEach(function (route, idx) {
+        var routeNum = idx + 1;
+        var diffClass = route.difficulty === '简单' ? 'diff-easy' : (route.difficulty === '中等' ? 'diff-medium' : 'diff-hard');
+        var isChecked = savedRouteId === route.id;
+        html += '<div class="route-card" id="route-card-' + route.id + '">' +
+          '<div class="route-card-head">' +
+            '<div class="route-card-tag">' + esc(route.tag) + '</div>' +
+            '<div class="route-card-name">路线 ' + routeNum + '：' + esc(route.name) + '</div>' +
+            '<div class="route-card-summary">' + esc(route.summary) + '</div>' +
+            '<div class="route-card-meta">' +
+              '<div class="route-meta-item"><strong>适合谁：</strong>' + esc(route.fitFor) + '</div>' +
+              '<div class="route-meta-item"><strong>使用条件：</strong>' + esc(route.requirement) + '</div>' +
+              '<div class="route-meta-item"><strong>安装难度：</strong>' +
+                '<span class="route-difficulty ' + diffClass + '">' + esc(route.difficulty) + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<button class="btn-route-steps" onclick="toggleRouteSteps(\'' + route.id + '\')">' +
+              '查看安装步骤 <span class="btn-route-arrow"></span>' +
+            '</button>' +
+          '</div>' +
+          '<div class="route-steps-panel" id="route-steps-' + route.id + '">' +
+            renderInstallSteps(route, projId, isChecked) +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+      return html;
+    }
+
+    function renderInstallSteps(route, projId, isChecked) {
+      var html = '<div class="install-steps">';
+      route.steps.forEach(function (step, idx) {
+        var tsId = 'ts-' + route.id + '-' + idx;
+        html += '<div class="install-step">' +
+          '<div class="install-step-num">' + (idx + 1) + '</div>' +
+          '<div class="install-step-body">' +
+            '<div class="install-step-title">' + esc(step.title) + '</div>' +
+            '<div class="install-step-content">' + esc(step.content) + '</div>' +
+            '<div class="install-step-success">✓ ' + esc(step.successHint) + '</div>' +
+            '<div class="install-troubleshoot">' +
+              '<button class="btn-troubleshoot" onclick="toggleTroubleshoot(\'' + tsId + '\')">遇到问题？点击查看排查提示</button>' +
+              '<div class="troubleshoot-content" id="' + tsId + '">' + esc(step.troubleshootingHint) + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '<div class="route-complete-wrap">' +
+        '<label class="route-complete-label">' +
+          '<input type="checkbox" id="route-check-' + route.id + '" ' + (isChecked ? 'checked' : '') +
+            ' onchange="onRouteCheck(\'' + route.id + '\',\'' + esc(projId) + '\')">' +
+          ' 我已完成这条路线的安装 ✓' +
+        '</label>' +
+      '</div>';
       html += '</div>';
       return html;
     }
@@ -586,17 +747,29 @@
         ) +
       '</div>' +
 
-      /* 第三步：选择工具 */
+      /* 第三步：选择路线并准备 AI 编程工具 */
       '<div class="section-card">' +
-        '<h2>第三步：选择你的 AI 编程工具</h2>' +
-        '<p class="section-desc">选一个工具安装好，后面用它来执行开发任务。</p>' +
+        '<h2>第三步：选择路线并准备 AI 编程工具</h2>' +
+        '<p class="section-desc">AI 编程有很多工具组合，不同组合适合不同的人。先了解基础知识，再选一条适合你的路线。</p>' +
+
+        '<div class="subsection-header">3.1 先了解两个基础概念</div>' +
+        '<p class="subsection-sub">如果你已经知道什么是命令行和代码编辑器，可以跳过这部分。</p>' +
+        renderAccordionGroup('基础知识') +
+
+        '<div class="subsection-header">3.2 选择一条适合你的路线</div>' +
+        '<p class="subsection-sub">每条路线是一个「AI 模型 + 编程工具」的组合。选一条最适合你当前情况的。</p>' +
         '<div class="info-box-yellow">' +
-          '不知道选哪个？<br>' +
-          '• 怕命令行、想要图形界面 → 选 <strong>Cursor</strong> 或 <strong>TRAE</strong><br>' +
-          '• 愿意学一点命令行、想要最强能力 → 选 <strong>Claude Code</strong><br>' +
-          '• 在中国大陆、网络受限 → 选 <strong>TRAE</strong>' +
+          '<strong>快速推荐：</strong><br>' +
+          '• 在中国大陆 + 零基础 + 想最快跑通 → 路线 1（DeepSeek + OpenCode）或路线 3（豆包 + TRAE）<br>' +
+          '• 在中国大陆 + 想要图形界面 → 路线 3（豆包 + TRAE）<br>' +
+          '• 能访问国际服务 + 想要最强能力 → 路线 6（Claude + Claude Code）<br>' +
+          '• 能访问国际服务 + 想要图形界面 → 路线 5（ChatGPT + Codex CLI）或装 Cursor' +
         '</div>' +
-        renderAccordion() +
+        renderRouteCards(projectId) +
+
+        '<div class="subsection-header">3.3 还不确定选哪个？</div>' +
+        '<p class="subsection-sub">下面是各主流工具的详细使用说明，供参考。</p>' +
+        renderAccordionGroup('AI 编程工具') +
       '</div>' +
 
       /* 第四步：AI 拆解任务 */
@@ -789,6 +962,33 @@
       var isOpen = item.classList.contains('open');
       document.querySelectorAll('.accordion-item.open').forEach(function (el) { el.classList.remove('open'); });
       if (!isOpen) item.classList.add('open');
+    };
+
+    /* ===== 路线卡片展开 ===== */
+    window.toggleRouteSteps = function (routeId) {
+      var card = document.getElementById('route-card-' + routeId);
+      var panel = document.getElementById('route-steps-' + routeId);
+      var isOpen = card.classList.contains('route-card-open');
+      document.querySelectorAll('.route-card.route-card-open').forEach(function (el) {
+        el.classList.remove('route-card-open');
+        var p = el.querySelector('.route-steps-panel');
+        if (p) p.style.maxHeight = '0';
+      });
+      if (!isOpen) {
+        card.classList.add('route-card-open');
+        panel.style.maxHeight = '2000px';
+      }
+    };
+
+    /* ===== 故障排查展开 ===== */
+    window.toggleTroubleshoot = function (tsId) {
+      document.getElementById(tsId).classList.toggle('open');
+    };
+
+    /* ===== 路线完成勾选 ===== */
+    window.onRouteCheck = function (routeId, projId) {
+      var cb = document.getElementById('route-check-' + routeId);
+      updateProject(projId, { route_id: cb.checked ? routeId : '' });
     };
 
     /* ===== 复制工具 ===== */
