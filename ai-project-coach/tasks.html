@@ -181,6 +181,76 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* ===== 任务编号按钮行 ===== */
+    .task-btn-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* 隐藏任务按钮行滚动条但保持可滚动 */
+    .task-btn-row::-webkit-scrollbar { height: 3px; }
+
+    .task-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-tertiary);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: var(--font-main);
+      transition: all 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .task-btn:hover {
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--text-primary);
+    }
+    .task-btn.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0a0a0f;
+    }
+    .task-btn.done {
+      background: rgba(0, 230, 118, 0.12);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    .task-btn.selected.done {
+      background: var(--success);
+      border-color: var(--success);
+      color: #0a0a0f;
+    }
+
+    /* 青色左边框提示框 */
+    .info-box-cyan {
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.85;
+    }
+
+    /* 任务完成计数 */
+    .task-progress-line {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 10px;
+    }
+    .task-progress-line strong { color: var(--success); }
+
     @media (max-width: 768px) {
       .actions-bar { flex-direction: column; }
       .actions-bar .btn-primary, .actions-bar .btn-secondary { width: 100%; }
@@ -295,31 +365,6 @@
         '设计书内容：\n---\n' + designContent + '\n---';
     }
 
-    function buildFirstPrompt() {
-      var name = ans.project_name || project.title;
-      var goal = ans.core_goal || '';
-      var platform = ans.platform_type || '';
-      var techStack = platform === '微信小程序' ? '微信小程序原生开发'
-        : platform === 'APP' ? '待确认（建议先明确 iOS/Android/跨平台）'
-        : '纯 HTML + CSS + JavaScript，无框架';
-      return '我要开始做一个新项目，请帮我执行第一个任务。\n\n' +
-        '项目名称：' + name + '\n' +
-        (goal ? '项目简介：' + goal + '\n' : '') +
-        '技术栈：' + techStack + '\n\n' +
-        '任务：task01 - 项目初始化\n\n' +
-        '目标：创建项目基础结构\n\n' +
-        '步骤：\n' +
-        '1. 创建项目文件夹\n' +
-        '2. 创建基础文件：index.html, css/style.css, js/main.js\n' +
-        '3. 搭建基础 HTML 结构（头部、主体、底部）\n' +
-        '4. 写一个最简单的首页，能在浏览器打开看到内容\n' +
-        '5. 初始化 Git 仓库，完成第一次 commit\n\n' +
-        '完成标志：\n' +
-        '- 双击 index.html 能在浏览器看到首页\n' +
-        '- Git 仓库已初始化，第一次 commit 完成\n\n' +
-        '请开始执行。';
-    }
-
     /* ===== 手风琴数据 ===== */
     var GUIDES = [
       {
@@ -402,18 +447,141 @@
       return html;
     }
 
-    /* ===== 渲染页面 ===== */
+    /* ===== 状态变量 ===== */
     var savedTaskList = taskPlan.task_list || '';
-    var savedFirstPrompt = taskPlan.first_prompt || '';
+    var selectedTask = 0;  // 0 = 未选中
+    var completedTasks = taskPlan.completed_tasks ? taskPlan.completed_tasks.slice() : [];
 
+    /* ===== 识别任务数量 ===== */
+    function detectTaskCount(text) {
+      if (!text || !text.trim()) return 10;
+      var max = 0;
+      // 匹配 task01～task99 / task 1～task 19 / Task 1 等
+      var patterns = [
+        /task(\d+)/gi,
+        /task\s+(\d+)/gi,
+        /任务\s*(\d+)/g,
+        /第\s*(\d+)\s*[个步阶]/g
+      ];
+      patterns.forEach(function (re) {
+        var m;
+        while ((m = re.exec(text)) !== null) {
+          var n = parseInt(m[1], 10);
+          if (n > max && n <= 50) max = n;
+        }
+      });
+      return max > 0 ? max : 10;
+    }
+
+    /* ===== 技术栈推断 ===== */
+    function getTechStack() {
+      var pt = ans.platform_type || '';
+      if (pt === '微信小程序') return '微信小程序原生开发';
+      if (pt === 'APP') return '待确认技术栈';
+      if (pt === '还没想好') return '待确认技术栈';
+      return '纯 HTML + CSS + JavaScript，无框架';
+    }
+
+    /* ===== 构建执行 Prompt ===== */
+    function buildExecPrompt(n) {
+      var name = ans.project_name || project.title;
+      var goal = ans.core_goal || '';
+      var stack = getTechStack();
+      var taskContent = savedTaskList;
+      var padded = String(n).padStart(2, '0');
+
+      if (n === 1) {
+        return '我要开始做一个新项目，请帮我执行第一个任务。\n\n' +
+          '项目名称：' + name + '\n' +
+          (goal ? '项目简介：' + goal + '\n' : '') +
+          '技术栈：' + stack + '\n\n' +
+          '以下是完整的任务清单：\n---\n' + taskContent + '\n---\n\n' +
+          '请执行 task01 的内容。\n\n' +
+          '要求：\n' +
+          '1. 只执行 task01，不要做后续任务\n' +
+          '2. 完成后告诉我做了什么、创建/修改了哪些文件\n' +
+          '3. 如果需要我操作（如浏览器登录等），请先说明\n\n' +
+          '请开始执行。';
+      } else {
+        return '我正在开发一个项目，现在继续执行下一个任务。\n\n' +
+          '项目名称：' + name + '\n' +
+          (goal ? '项目简介：' + goal + '\n' : '') +
+          '技术栈：' + stack + '\n\n' +
+          '以下是完整的任务清单：\n---\n' + taskContent + '\n---\n\n' +
+          '请执行 task' + padded + ' 的内容。\n\n' +
+          '要求：\n' +
+          '1. 只执行 task' + padded + '，不要做其他任务\n' +
+          '2. 注意与之前已完成任务的代码保持一致和兼容\n' +
+          '3. 完成后告诉我做了什么、创建/修改了哪些文件\n' +
+          '4. 如果发现之前任务的代码有问题需要调整，请先说明再修改\n\n' +
+          '请开始执行。';
+      }
+    }
+
+    /* ===== 渲染任务按钮 ===== */
+    function renderTaskButtons() {
+      var count = detectTaskCount(savedTaskList);
+      var html = '';
+      for (var i = 1; i <= count; i++) {
+        var isDone = completedTasks.indexOf(i) !== -1;
+        var isSel = (selectedTask === i);
+        var cls = 'task-btn' + (isSel ? ' selected' : '') + (isDone ? ' done' : '');
+        html += '<button class="' + cls + '" ' +
+          'onclick="selectTask(' + i + ')" ' +
+          'ondblclick="toggleTaskDone(' + i + ')" ' +
+          'title="双击标记完成/取消">' +
+          'task' + String(i).padStart(2, '0') +
+          (isDone ? ' ✓' : '') +
+        '</button>';
+      }
+      var el = document.getElementById('task-btn-row');
+      if (el) el.innerHTML = html;
+      updateTaskProgress();
+      updateGenBtn();
+    }
+
+    function updateTaskProgress() {
+      var count = detectTaskCount(savedTaskList);
+      var done = completedTasks.length;
+      var el = document.getElementById('task-progress');
+      if (el) {
+        el.innerHTML = '已完成 <strong>' + done + '</strong> / ' + count + ' 个任务';
+      }
+      // 更新底部按钮
+      var btnComplete = document.getElementById('btn-mark-complete');
+      if (btnComplete) {
+        if (done >= count && count > 0) {
+          btnComplete.textContent = '🎉 全部任务已完成！';
+        } else {
+          btnComplete.textContent = '保存并标记项目完成';
+        }
+      }
+    }
+
+    function updateGenBtn() {
+      var btn = document.getElementById('btn-gen-exec');
+      if (!btn) return;
+      var hasTaskList = savedTaskList.trim().length > 0;
+      if (!hasTaskList) {
+        btn.textContent = '请先在第二步粘贴任务清单';
+        btn.disabled = true;
+      } else if (selectedTask === 0) {
+        btn.textContent = '请先选择任务编号';
+        btn.disabled = true;
+      } else {
+        var padded = String(selectedTask).padStart(2, '0');
+        btn.textContent = '生成 task' + padded + ' 的执行 Prompt';
+        btn.disabled = false;
+      }
+    }
+
+    /* ===== 渲染主页面 ===== */
     content.innerHTML =
-      /* 标题 */
       '<div class="page-header">' +
         '<h1>把设计书拆解成可执行的任务</h1>' +
         '<p>用 AI 把设计书拆成一步步的开发任务，每个任务都可以直接交给 AI 编程工具执行。</p>' +
       '</div>' +
 
-      /* 项目信息栏 */
       '<div class="project-bar">' +
         '<div class="project-bar-name">' + esc(ans.project_name || project.title) + '</div>' +
         '<span class="stage-badge">已生成设计书</span>' +
@@ -440,29 +608,56 @@
         '<button class="btn-secondary" onclick="saveTaskList()" style="width:auto;">保存任务清单</button>' +
       '</div>' +
 
-      /* 区域三：首轮开发 Prompt */
-      '<div class="section-card">' +
-        '<h2>第三步：生成首轮开发 Prompt</h2>' +
-        '<p class="section-desc">这段 prompt 可以直接复制给 AI 编程工具（如 Claude Code、Cursor、TRAE），让它开始执行第一个任务。</p>' +
-        '<button class="btn-primary" onclick="genFirstPrompt()" style="width:auto;">生成首轮开发 Prompt</button>' +
-        '<div class="prompt-box' + (savedFirstPrompt ? ' visible' : '') + '" id="pbox-first">' +
-          '<pre class="prompt-text" id="ptext-first">' + esc(savedFirstPrompt || buildFirstPrompt()) + '</pre>' +
-          '<button class="btn-copy" id="pcopy-first" onclick="copyPrompt(\'first\')">复制</button>' +
+      /* 区域三：逐个执行任务 */
+      '<div class="section-card" id="exec-section">' +
+        '<h2>第三步：逐个执行任务</h2>' +
+        '<div class="info-box-cyan">' +
+          '这是你的任务执行中心。流程是这样的：<br>' +
+          '① 选择要执行的任务编号 &nbsp;→&nbsp; ' +
+          '② 生成该任务的执行 Prompt &nbsp;→&nbsp; ' +
+          '③ 复制 Prompt 到 AI 编程工具执行 &nbsp;→&nbsp; ' +
+          '④ 完成后回到这里，双击按钮标记完成，再选下一个任务 &nbsp;→&nbsp; ' +
+          '重复直到全部完成。' +
+        '</div>' +
+
+        '<div style="margin-bottom:16px;">' +
+          '<div style="font-size:14px;font-weight:600;margin-bottom:10px;">当前要执行哪个任务？</div>' +
+          '<div class="task-btn-row" id="task-btn-row"></div>' +
+          '<div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">点击选择任务；双击可标记为已完成 / 取消完成</div>' +
+          '<div class="task-progress-line" id="task-progress">已完成 <strong>0</strong> / 0 个任务</div>' +
+        '</div>' +
+
+        '<button class="btn-primary" id="btn-gen-exec" onclick="genExecPrompt()" style="width:auto;" disabled>请先选择任务编号</button>' +
+        '<div class="prompt-box" id="pbox-exec">' +
+          '<pre class="prompt-text" id="ptext-exec"></pre>' +
+          '<button class="btn-copy" id="pcopy-exec" onclick="copyPromptById(\'ptext-exec\', \'pcopy-exec\')">复制</button>' +
+        '</div>' +
+
+        '<div class="notice-box" style="margin-top:16px;">' +
+          '复制上面的 Prompt 后：<br>' +
+          '• 如果用 Claude Code：粘贴到终端对话中，回车执行<br>' +
+          '• 如果用 Cursor / TRAE：粘贴到 AI 对话面板中，回车执行<br>' +
+          '• 执行完毕后回到这里，双击该任务按钮标记为 ✓，再选下一个任务' +
+        '</div>' +
+        '<div style="font-size:12px;color:var(--text-secondary);margin-top:10px;line-height:1.6;">' +
+          '如果你用 Claude Code，也可以直接在终端说「请根据任务清单执行 task02」，不需要每次来这里生成 Prompt。但对于新手，建议用这里生成的完整 Prompt，信息更全面。' +
         '</div>' +
       '</div>' +
 
       /* 区域四：开发实战指南 */
       '<div class="section-card">' +
         '<h2>第四步：开始实战开发</h2>' +
-        '<p class="section-desc">现在你有了任务清单和开发 prompt，下一步是打开 AI 编程工具开始干活。如果你不熟悉下面提到的工具，先看前两个基础介绍。</p>' +
+        '<p class="section-desc">不熟悉 AI 编程工具？先看下面的入门指南。</p>' +
         renderAccordion() +
       '</div>' +
 
-      /* 底部操作栏 */
       '<div class="actions-bar">' +
         '<button class="btn-secondary" onclick="exportAll()">导出全部内容</button>' +
-        '<button class="btn-primary" onclick="markComplete()">保存并标记完成</button>' +
+        '<button class="btn-primary" id="btn-mark-complete" onclick="markComplete()">保存并标记项目完成</button>' +
       '</div>';
+
+    /* 初始化渲染任务按钮 */
+    renderTaskButtons();
 
     /* ===== 交互函数 ===== */
     window.genTaskPrompt = function () {
@@ -473,17 +668,34 @@
       box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
-    window.genFirstPrompt = function () {
-      var text = buildFirstPrompt();
-      document.getElementById('ptext-first').textContent = text;
-      var box = document.getElementById('pbox-first');
+    window.selectTask = function (n) {
+      selectedTask = n;
+      renderTaskButtons();
+    };
+
+    window.toggleTaskDone = function (n) {
+      var idx = completedTasks.indexOf(n);
+      if (idx === -1) {
+        completedTasks.push(n);
+      } else {
+        completedTasks.splice(idx, 1);
+      }
+      saveCompletedTasks();
+      renderTaskButtons();
+    };
+
+    window.genExecPrompt = function () {
+      if (!selectedTask || !savedTaskList.trim()) return;
+      var text = buildExecPrompt(selectedTask);
+      document.getElementById('ptext-exec').textContent = text;
+      var box = document.getElementById('pbox-exec');
       box.classList.add('visible');
       box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
-    window.copyPrompt = function (key) {
-      var textEl = document.getElementById('ptext-' + key);
-      var btn = document.getElementById('pcopy-' + key);
+    window.copyPromptById = function (textId, btnId) {
+      var textEl = document.getElementById(textId);
+      var btn = document.getElementById(btnId);
       var text = textEl.textContent;
       function markCopied() {
         btn.textContent = '已复制 ✓'; btn.classList.add('copied');
@@ -500,10 +712,24 @@
       }
     };
 
+    /* 兼容旧的 copyPrompt(key) 调用（区域一复制按钮） */
+    window.copyPrompt = function (key) {
+      window.copyPromptById('ptext-' + key, 'pcopy-' + key);
+    };
+
+    function saveCompletedTasks() {
+      updateProject(projectId, {
+        task_plan: Object.assign({}, taskPlan, { completed_tasks: completedTasks })
+      });
+      taskPlan.completed_tasks = completedTasks;
+    }
+
     window.saveTaskList = function () {
       var val = document.getElementById('ta-tasklist').value;
+      savedTaskList = val;
       updateProject(projectId, { task_plan: Object.assign({}, taskPlan, { task_list: val }) });
       taskPlan.task_list = val;
+      renderTaskButtons();
       showToast('已保存 ✓');
     };
 
@@ -516,8 +742,8 @@
 
     window.exportAll = function () {
       var taskListVal = document.getElementById('ta-tasklist').value;
-      var firstPromptVal = document.getElementById('ptext-first').textContent || buildFirstPrompt();
       var name = ans.project_name || project.title;
+      var task01Prompt = buildExecPrompt(1);
       var lines = [
         '# ' + name + ' — 任务拆解\n',
         '## 项目信息\n',
@@ -529,9 +755,9 @@
         '## 任务清单\n',
         taskListVal || '（暂未填写）',
         '',
-        '## 首轮开发 Prompt\n',
+        '## task01 执行 Prompt（参考）\n',
         '```',
-        firstPromptVal,
+        task01Prompt,
         '```',
         '',
         '## 开发工具\n',
@@ -555,10 +781,20 @@
 
     window.markComplete = function () {
       var taskListVal = document.getElementById('ta-tasklist').value;
-      var firstPromptVal = buildFirstPrompt();
+      var totalCount = detectTaskCount(savedTaskList);
+      var doneCount = completedTasks.length;
+
+      if (doneCount < totalCount && totalCount > 0) {
+        var remaining = totalCount - doneCount;
+        if (!confirm('还有 ' + remaining + ' 个任务未完成，确定要标记项目完成吗？')) return;
+      }
+
       updateProject(projectId, {
         stage: 'tasks',
-        task_plan: { task_list: taskListVal, first_prompt: firstPromptVal }
+        task_plan: Object.assign({}, taskPlan, {
+          task_list: taskListVal,
+          completed_tasks: completedTasks
+        })
       });
       document.getElementById('celebrate-overlay').style.display = 'flex';
     };
