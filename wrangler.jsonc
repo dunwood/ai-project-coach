@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ai-project-coach",
+  "compatibility_date": "2026-04-02",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "ai-project-coach"
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
