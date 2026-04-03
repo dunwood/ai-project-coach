@@ -1,0 +1,9 @@
+.env
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+.open-next/
+.wrangler/
+.claude/
+registration-codes.txt

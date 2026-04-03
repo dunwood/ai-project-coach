@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>下一步操作指南 — AI 项目教练</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== 面包屑 ===== */
+    .breadcrumb { font-size: 13px; color: var(--text-secondary); margin-bottom: 28px; }
+    .breadcrumb a { color: var(--text-secondary); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb span { margin: 0 5px; }
+
+    /* ===== 页面标题 ===== */
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px; }
+    .page-header p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; max-width: 600px; }
+
+    /* ===== 项目信息栏 ===== */
+    .project-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-card); padding: 12px 18px; margin-bottom: 32px;
+    }
+    .project-bar-name { font-size: 15px; font-weight: 700; }
+    .stage-badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 10px; border-radius: 20px;
+      background: rgba(124,77,255,0.1); color: var(--accent-purple);
+      border: 1px solid rgba(124,77,255,0.25);
+    }
+    .project-bar-link { font-size: 13px; margin-left: auto; }
+
+    /* ===== 区域卡片 ===== */
+    .section-card {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-card); padding: 24px; margin-bottom: 24px;
+    }
+    .section-card h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .section-card .section-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 20px; }
+
+    /* ===== 提示框 ===== */
+    .info-box-cyan {
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.85;
+    }
+    .info-box-yellow {
+      background: rgba(255, 215, 64, 0.05);
+      border: 1px solid rgba(255, 215, 64, 0.2);
+      border-left: 3px solid var(--warning);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.85;
+    }
+
+    /* ===== 第一步：文件夹 ===== */
+    .os-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .os-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .os-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .cmd-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .cmd-text {
+      flex: 1;
+      font-family: var(--font-code);
+      font-size: 12px;
+      color: #cdd6f4;
+      background: #0d0d16;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      word-break: break-all;
+    }
+    .btn-cmd-copy {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-family: var(--font-main);
+      font-weight: 600;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-cmd-copy:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-cmd-copy.copied { color: var(--success); border-color: var(--success); }
+
+    .folder-input-wrap {
+      margin-bottom: 16px;
+    }
+    .folder-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 7px;
+      color: var(--text-primary);
+    }
+    .folder-error {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 5px;
+      display: none;
+    }
+    .folder-error.show { display: block; }
+
+    /* ===== 第二步：下载卡片 ===== */
+    .doc-download-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .doc-download-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .doc-download-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .doc-download-card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    /* ===== 第三步：手风琴 ===== */
+    .accordion-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .accordion-item {
+      background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden;
+    }
+    .accordion-header {
+      width: 100%; background: none; border: none; padding: 15px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-primary);
+      font-family: var(--font-main); text-align: left; gap: 12px;
+      transition: color 0.2s;
+    }
+    .accordion-header:hover { color: var(--accent); }
+    .acc-icon {
+      width: 18px; height: 18px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s;
+    }
+    .acc-icon::after {
+      content: '';
+      display: block; width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--text-secondary);
+      transition: border-top-color 0.2s;
+    }
+    .accordion-item.open .acc-icon { transform: rotate(180deg); }
+    .accordion-item.open .acc-icon::after { border-top-color: var(--accent); }
+    .accordion-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+      padding: 0 18px; font-size: 13px; color: var(--text-secondary); line-height: 1.8;
+    }
+    .accordion-item.open .accordion-body { max-height: 1200px; padding: 0 18px 18px; }
+    .accordion-body pre {
+      background: #0d0d16; border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px; font-family: var(--font-code); font-size: 12px;
+      color: #cdd6f4; white-space: pre-wrap; margin: 10px 0; overflow-x: auto;
+    }
+    .accordion-group-label {
+      font-size: 11px; font-weight: 700; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    }
+
+    /* ===== 第四步：提示词区 ===== */
+    .ai-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .ai-link-btn {
+      display: inline-block; background: var(--bg-tertiary); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-secondary); font-size: 13px; font-weight: 600;
+      padding: 6px 14px; transition: color 0.2s, border-color 0.2s;
+    }
+    .ai-link-btn:hover { color: var(--accent); border-color: rgba(0,229,255,0.4); }
+
+    .prompt-box { display: none; position: relative; margin-top: 14px; }
+    .prompt-box.visible { display: block; }
+    .prompt-text {
+      background: #0d0d16;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 80px 14px 18px;
+      font-family: var(--font-code);
+      font-size: 12px;
+      line-height: 1.7;
+      color: #cdd6f4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .btn-copy {
+      position: absolute; top: 8px; right: 8px;
+      background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text-secondary); font-size: 12px; font-family: var(--font-main);
+      font-weight: 600; padding: 4px 11px; cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-copy:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-copy.copied { color: var(--success); border-color: var(--success); }
+
+    /* ===== 第五步：执行流程 ===== */
+    .exec-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .exec-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .exec-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #0a0a0f;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .exec-step-body {
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.65;
+      padding-top: 3px;
+    }
+    .exec-step-body code {
+      font-family: var(--font-code);
+      font-size: 12px;
+      background: var(--bg-secondary);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .exec-step-body .sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ===== 底部操作栏 ===== */
+    .actions-bar {
+      display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+      margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .actions-bar .btn-primary, .actions-bar .btn-secondary { font-size: 14px; padding: 10px 20px; width: auto; }
+
+    /* ===== 庆祝弹窗 ===== */
+    @keyframes celebrateScale {
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .celebrate-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      z-index: 600; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .celebrate-modal {
+      background: var(--bg-secondary); border: 1px solid rgba(0,229,255,0.3);
+      border-radius: var(--radius-card); padding: 36px 32px; max-width: 460px; width: 100%;
+      text-align: center; box-shadow: 0 8px 48px rgba(0,229,255,0.12);
+      animation: celebrateScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    .celebrate-emoji { font-size: 64px; margin-bottom: 16px; }
+    .celebrate-modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+    .celebrate-modal p { font-size: 14px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 28px; }
+    .celebrate-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .celebrate-actions .btn-primary, .celebrate-actions .btn-secondary { width: auto; font-size: 14px; }
+
+    /* ===== 错误/警告卡 ===== */
+    .error-card { background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.25); border-radius: var(--radius-card); padding: 24px; }
+    .error-card p { color: var(--danger); font-size: 14px; margin-bottom: 14px; }
+    .info-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px; margin-bottom: 24px; }
+    .info-card.warn { border-color: rgba(255,215,64,0.3); background: rgba(255,215,64,0.05); }
+    .info-card .warn-title { font-size: 15px; font-weight: 700; color: var(--warning); margin-bottom: 8px; }
+    .info-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.7; }
+
+    @media (max-width: 768px) {
+      .os-grid { grid-template-columns: 1fr; }
+      .doc-download-grid { grid-template-columns: 1fr; }
+      .actions-bar { flex-direction: column; }
+      .actions-bar .btn-primary, .actions-bar .btn-secondary { width: 100%; }
+      .celebrate-actions { flex-direction: column; }
+      .celebrate-actions .btn-primary, .celebrate-actions .btn-secondary { width: 100%; }
+      .accordion-body pre { white-space: pre; overflow-x: auto; }
+      .prompt-text { padding-right: 16px; padding-bottom: 50px; }
+    }
+
+    /* ===== 第三步子区域标题 ===== */
+    .subsection-header {
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+      margin: 24px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+    .subsection-sub {
+      font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.65;
+    }
+
+    /* ===== 路线卡片列表 ===== */
+    .route-cards-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .route-card {
+      background: var(--bg-primary); border: 1px solid var(--border);
+      border-radius: var(--radius-card); overflow: hidden; transition: border-color 0.2s;
+    }
+    .route-card:hover { border-color: rgba(0,229,255,0.25); }
+    .route-card.route-card-open { border-color: rgba(0,229,255,0.45); }
+    .route-card-head { padding: 18px 18px 14px; position: relative; }
+    .route-card-tag {
+      position: absolute; top: 14px; right: 14px;
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; letter-spacing: 0.3px;
+      background: rgba(0,229,255,0.1); color: var(--accent);
+      border: 1px solid rgba(0,229,255,0.25);
+    }
+    .route-card-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; padding-right: 90px; }
+    .route-card-summary { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.6; }
+    .route-card-meta { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .route-meta-item { font-size: 13px; color: var(--text-secondary); }
+    .route-meta-item strong { color: var(--text-primary); font-weight: 600; }
+    .route-difficulty { font-weight: 700; padding: 1px 8px; border-radius: 10px; font-size: 12px; }
+    .diff-easy  { background: rgba(0,230,118,0.12); color: var(--success); }
+    .diff-medium { background: rgba(255,215,64,0.12); color: var(--warning); }
+    .diff-hard  { background: rgba(255,82,82,0.12);  color: var(--danger); }
+    .btn-route-steps {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 14px; cursor: pointer;
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      font-family: var(--font-main); transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-route-steps:hover { color: var(--accent); border-color: rgba(0,229,255,0.4); }
+    .route-card-open .btn-route-steps { color: var(--accent); border-color: rgba(0,229,255,0.4); }
+    .btn-route-arrow {
+      display: inline-block; width: 0; height: 0;
+      border-left: 5px solid transparent; border-right: 5px solid transparent;
+      border-top: 7px solid currentColor; transition: transform 0.3s;
+    }
+    .route-card-open .btn-route-arrow { transform: rotate(180deg); }
+
+    /* ===== 安装步骤面板 ===== */
+    .route-steps-panel {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.45s ease;
+      border-top: 1px solid transparent;
+    }
+    .route-card-open .route-steps-panel { border-top-color: var(--border); }
+    .install-steps { padding: 20px 18px; display: flex; flex-direction: column; gap: 18px; }
+    .install-step { display: flex; gap: 14px; align-items: flex-start; }
+    .install-step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent); color: #0a0a0f;
+      font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .install-step-body { flex: 1; }
+    .install-step-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .install-step-content { font-size: 13px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 8px; }
+    .install-step-success { font-size: 13px; color: var(--success); font-weight: 600; margin-bottom: 8px; }
+    .btn-troubleshoot {
+      background: none; border: none; padding: 0; cursor: pointer;
+      font-size: 12px; color: var(--text-secondary); font-family: var(--font-main);
+      transition: color 0.2s; text-decoration: underline; text-decoration-style: dotted;
+    }
+    .btn-troubleshoot:hover { color: var(--text-primary); }
+    .troubleshoot-content {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s;
+      font-size: 12px; color: var(--text-secondary); line-height: 1.7; padding: 0;
+    }
+    .troubleshoot-content.open { max-height: 200px; padding-top: 6px; }
+    .route-complete-wrap {
+      padding: 14px 18px 18px; border-top: 1px dashed var(--border); margin-top: 4px;
+    }
+    .route-complete-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text-primary);
+    }
+    .route-complete-label input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .route-card-tag { position: static; display: inline-block; margin-bottom: 8px; }
+      .route-card-name { padding-right: 0; }
+    }
+
+    /* ===== 练习基础命令 ===== */
+    .cmd-practice-section { margin-top: 20px; margin-bottom: 4px; }
+    .cmd-practice-title {
+      font-size: 14px; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);
+    }
+    .cmd-practice-desc {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 12px;
+    }
+    .terminal-block {
+      background: #0a0a12; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .terminal-label {
+      font-family: var(--font-code); font-size: 11px; color: #555;
+      letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .cmd-practice-cards { display: flex; flex-direction: column; gap: 12px; }
+    .cmd-practice-card {
+      background: #0f0f1a; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; overflow: hidden;
+    }
+    .cmd-practice-card-head {
+      padding: 8px 12px 6px; background: #12121e;
+      font-size: 11px; font-weight: 700; color: var(--success); letter-spacing: 0.3px;
+    }
+    .cmd-practice-card-body {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    }
+    .cmd-practice-code {
+      flex: 1; font-family: var(--font-code); font-size: 14px; color: #e8e8f0;
+      letter-spacing: 0.3px;
+    }
+    .btn-cmd-practice-copy {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 5px; color: var(--text-secondary); font-size: 11px;
+      font-family: var(--font-main); font-weight: 600; padding: 4px 10px;
+      cursor: pointer; white-space: nowrap; flex-shrink: 0;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .btn-cmd-practice-copy:hover { color: var(--accent); border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.06); }
+    .btn-cmd-practice-copy.copied { color: var(--success); border-color: rgba(0,230,118,0.4); }
+    .cmd-practice-hint {
+      padding: 6px 12px 10px; font-size: 12px; color: #555; line-height: 1.65;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .cmd-practice-done {
+      margin-top: 14px; padding: 12px 16px;
+      background: rgba(0,230,118,0.06); border-left: 3px solid var(--success);
+      border-radius: 6px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="page-body">
+    <div class="container" style="padding-top: 48px; padding-bottom: 100px; max-width: 760px;">
+
+      <div class="page-nav">
+        <a href="index.html" class="nav-link">← 返回首页</a>
+        <a href="javascript:history.back()" class="nav-link">← 返回上一页</a>
+      </div>
+
+      <div class="breadcrumb">
+        <a href="index.html">首页</a><span>›</span>
+        <a href="workspace.html">工作台</a><span>›</span>
+        <span>下一步操作指南</span>
+      </div>
+
+      <div id="page-content"></div>
+
+    </div>
+  </div>
+
+  <!-- 庆祝弹窗 -->
+  <div class="celebrate-overlay" id="celebrate-overlay" style="display:none">
+    <div class="celebrate-modal">
+      <div class="celebrate-emoji">🎉</div>
+      <h2>恭喜！你已经掌握了完整流程！</h2>
+      <p>你已经完成了从想法到可执行方案的全过程。<br>现在打开 AI 编程工具，开始把方案变成真实的产品吧！</p>
+      <div class="celebrate-actions">
+        <a href="workspace.html" class="btn-secondary">返回工作台</a>
+        <a href="idea.html" class="btn-primary">再做一个新项目</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-mount"></div>
+
+  <script src="data/routes.js"></script>
+  <script src="js/project.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/legal.js"></script>
+  <script src="js/fingerprint.js"></script>
+  <script src="data/codes.js"></script>
+  <script src="js/access.js"></script>
+  <script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var projectId = params.get('id');
+    var content = document.getElementById('page-content');
+
+    function showError(msg, extra) {
+      content.innerHTML = '<div class="error-card"><p>' + msg + '</p>' +
+        (extra || '<a href="workspace.html" class="btn-secondary" style="width:auto;display:inline-block;">返回工作台</a>') + '</div>';
+    }
+
+    if (!projectId) { showError('未找到项目，请从工作台选择项目继续。'); return; }
+    var project = getProject(projectId);
+    if (!project) { showError('找不到该项目，可能已被删除。'); return; }
+
+    var ans = project.clarify_answers || {};
+    var doc = project.design_doc || {};
+    var taskPlan = project.task_plan || {};
+
+    /* 获取最佳设计书版本 */
+    var designContent = (doc.ai_coding || doc.standard || doc.popular || '').trim();
+
+    /* ===== 工具函数 ===== */
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function todayStr() {
+      var d = new Date();
+      return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    }
+
+    var projectName = ans.project_name || project.title || '我的项目';
+    var folderName = taskPlan.folder_name || 'my-project';
+
+    /* ===== 手风琴数据 ===== */
+    var GUIDES = [
+      {
+        group: '基础知识',
+        emoji: '📖',
+        items: [
+          {
+            title: '什么是命令行（CLI）？',
+            body: '命令行（CLI，Command Line Interface）就是一个纯文字的操作界面——没有按钮可以点，你通过输入文字命令来控制电脑。\n\n在不同系统上它叫不同的名字：\n- Windows：PowerShell（推荐）或 CMD（命令提示符）\n- Mac：终端（Terminal）\n- Linux：终端（Terminal）\n\n怎么打开：\n- Windows：按 Win 键，输入"PowerShell"，回车\n- Mac：按 Cmd+空格，输入"Terminal"，回车\n\n你只需要掌握几个最基础的命令：\n- cd 文件夹名：进入某个文件夹（比如 cd Desktop 就是进入桌面）\n- cd ..：退回上一层文件夹\n- dir（Windows）或 ls（Mac/Linux）：查看当前文件夹里有什么文件\n- 上下箭头键：翻看之前输入过的命令\n\n为什么需要它：\nClaude Code 等 AI 编程工具运行在命令行里。你不需要精通命令行，只需要会打开它、进入项目文件夹、输入一条启动命令就够了。剩下的交给 AI。'
+          },
+          {
+            title: '什么是 VS Code？需要装吗？',
+            body: 'VS Code（Visual Studio Code）是一个免费的代码编辑器，由微软出品。你可以把它理解为一个"高级记事本"——专门用来查看和编辑代码文件的。\n\n下载地址：https://code.visualstudio.com\n\n它能帮你做什么：\n- 打开整个项目文件夹，一目了然地看到所有文件\n- 代码文件会有语法高亮，方便阅读\n- 内置终端（命令行），不用另外打开 PowerShell\n- 可以直接在里面编辑文件，比如改个文字、调个颜色\n\n需要装吗：\n- 如果你用 Cursor 或 TRAE：不需要装 VS Code，它们本身就是类似的编辑器\n- 如果你用 Claude Code（命令行工具）：强烈建议装一个 VS Code，用来查看项目文件和检查 AI 生成的代码\n- 如果你什么都还没装：先装 VS Code，它是最基础的工具'
+          },
+          {
+            title: '什么是 Git？',
+            body: 'Git 是一个版本控制工具——你可以把它理解为项目文件的"时光机"。\n\n它能做什么：\n- 每次你的项目有进展，Git 帮你保存一个"快照"（叫做 commit）\n- 如果改坏了，可以回退到之前任意一个快照\n- 记录每次改了什么、什么时候改的\n\n为什么需要它：\nAI 编程工具（如 Claude Code）会自动使用 Git 来管理你的代码。每完成一个任务，它会帮你保存一次。如果某个任务做坏了，可以回到上一个好的版本重来。\n\n安装方法：\n- Windows：下载安装 https://git-scm.com，一路点"下一步"即可\n- Mac：打开终端输入 git --version，如果没有会自动提示安装\n\n安装后你不需要学 Git 命令，AI 编程工具会帮你操作。但知道它是什么、为什么有用就够了。'
+          },
+          {
+            title: '什么是 GitHub？',
+            body: 'GitHub 是一个代码托管平台——你可以把它理解为"代码的网盘"。\n\n它能做什么：\n- 把你电脑上的项目文件备份到云端\n- 即使换电脑、重装系统，代码都不会丢\n- 可以把项目分享给别人看\n\n为什么需要它：\n- 很多部署平台（如 Cloudflare Pages）直接从 GitHub 读取代码并自动上线\n- AI 编程工具经常会帮你把代码推送到 GitHub\n- 它是程序员世界的"标配"，注册一个不亏\n\n注册方法：\n1. 打开 https://github.com\n2. 点 Sign up，用邮箱注册（免费）\n3. 注册完成后记住你的用户名\n\n你不需要学会 GitHub 的所有功能，只需要有一个账号。后续 AI 编程工具会帮你操作。'
+          },
+          {
+            title: '什么是 Node.js？需要装吗？',
+            body: 'Node.js 是一个 JavaScript 运行环境——你可以把它理解为很多开发工具的"底座"。\n\n它本身你不会直接用，但很多工具依赖它才能运行：\n- Claude Code 需要 Node.js\n- 很多网页项目的开发工具需要 Node.js\n- npm（Node.js 自带的包管理器）用来安装各种工具\n\n需要装吗：\n- 如果你选了 Claude Code → 必须装\n- 如果你选了 Cursor 或 TRAE → 暂时不用，但以后可能需要\n- 总之建议装一个，迟早用得上\n\n安装方法：\n1. 打开 https://nodejs.org\n2. 下载 LTS 版本（长期支持版，更稳定）\n3. 双击安装，一路点"下一步"\n4. 安装完成后打开 PowerShell，输入 node --version，看到版本号就说明成功了'
+          },
+          {
+            title: '什么是 Cloudflare Pages？',
+            body: 'Cloudflare Pages 是一个网站托管平台——你可以把它理解为"帮你把网站放到互联网上的服务"。\n\n你在电脑上做好的网页，双击 index.html 只有你自己能看到。要让全世界的人都能通过网址访问，就需要把文件"部署"到一个服务器上。Cloudflare Pages 就是做这件事的。\n\n为什么选它：\n- 免费（个人项目完全够用）\n- 速度快（全球都有服务器节点）\n- 在中国大陆可以正常访问（这很重要，很多国外平台不行）\n- 可以绑定你自己的域名（比如 xxx.zhexueyuan.com）\n- 连接 GitHub 后，每次你推送代码就自动更新网站\n\n怎么用：\n1. 注册 Cloudflare 账号：https://dash.cloudflare.com/sign-up\n2. 进入 Workers & Pages\n3. 创建一个 Pages 项目，连接你的 GitHub 仓库\n4. Cloudflare 会自动把你的代码变成一个在线网站\n\n后续 AI 编程工具帮你把代码推到 GitHub 后，Cloudflare 会自动部署，你不需要额外操作。'
+          }
+        ]
+      },
+      {
+        group: 'AI 编程工具',
+        emoji: '🤖',
+        items: [
+          {
+            title: '如何用 Claude Code 执行任务',
+            body: 'Claude Code 是目前最强的 AI 编程工具之一，在命令行中运行。它能自主读写文件、运行代码、调试错误，像一个真正的程序员搭档。\n\n前置条件：\n- 需要 Claude Pro 或 Max 订阅（claude.ai 付费）\n- 需要安装 Node.js（下载地址：https://nodejs.org，选 LTS 版本）\n\n安装步骤：\n1. 安装 Node.js 后，打开 PowerShell（Windows）或终端（Mac）\n2. 输入：npm install -g @anthropic-ai/claude-code\n3. 等待安装完成\n\n开始使用：\n1. 在 PowerShell 中进入你的项目文件夹\n2. 输入：claude\n3. 首次使用会弹出浏览器让你登录 Claude 账号\n4. 把设计书内容或任务发给它，它会自动创建文件、写代码\n\n高效技巧：\n- 启动时加 --dangerously-skip-permissions 可跳过反复确认\n- 可以直接说"请读取 CLAUDE.md，然后开始执行 task01"\n- 遇到问题可以截图或复制错误信息给它'
+          },
+          {
+            title: '如何用 Cursor 执行任务',
+            body: 'Cursor 是一个带 AI 的代码编辑器，有图形界面，不需要用命令行，更适合不熟悉终端的用户。\n\n下载地址：https://cursor.com\n\n安装后使用：\n1. 打开 Cursor\n2. 点击"打开文件夹"，选择你的项目文件夹\n3. 按 Ctrl+L（Mac 用 Cmd+L）打开 AI 对话面板\n4. 把设计书内容或任务粘贴到对话框，回车\n5. Cursor 会生成代码并显示修改预览\n6. 确认后点"Apply"应用修改\n\n适合谁：\n- 不想用命令行的人\n- 想看到代码修改对比的人\n- 想要图形界面操作的人'
+          },
+          {
+            title: '如何用 TRAE 执行任务',
+            body: 'TRAE 是字节跳动出品的 AI 编辑器，国内访问友好，中文支持好。\n\n下载地址：https://trae.ai\n\n安装后使用：\n1. 打开 TRAE，导入你的项目文件夹\n2. 使用内置 AI 功能开始对话\n3. 把设计书内容或任务粘贴到 AI 对话中\n4. TRAE 会帮你生成和修改代码\n5. 检查结果，有问题继续对话修复\n\n适合谁：\n- 在中国大陆、网络环境受限的用户\n- 想用中文交互的用户\n- 习惯图形界面操作的用户'
+          },
+          {
+            title: '💡 我还是不知道怎么开始，怎么办？',
+            body: '别担心，你可以：\n\n1. 把设计书文件保存好（用第二步的下载功能）\n2. 带着设计书文件去问任何一个 AI 大模型："我是零基础，有这份设计书，请一步步教我怎么开始开发"\n3. AI 会根据你的具体情况给出更详细的步骤指导\n\n推荐的起步路径：\n- 完全零基础、怕命令行 → 先装 Cursor 或 TRAE（图形界面）\n- 愿意学一点命令行 → 装 Claude Code（能力最强）\n- 不管用哪个工具，第一步都是：装工具 → 打开项目文件夹 → 把设计书发给它 → 开始\n\n记住：你不需要懂代码，你只需要能描述需求和验证结果。'
+          }
+        ]
+      }
+    ];
+
+    function renderAccordionGroup(groupName) {
+      var html = '<div class="accordion-list">';
+      GUIDES.forEach(function (grp) {
+        if (grp.group !== groupName) return;
+        grp.items.forEach(function (item, idx) {
+          var id = 'acc-' + grp.group.replace(/\s+/g,'') + idx;
+          var title = item.title;
+          if (!title.match(/^[^\w\s]/)) {
+            title = grp.emoji + ' ' + title;
+          }
+          html +=
+            '<div class="accordion-item" id="' + id + '">' +
+              '<button class="accordion-header" onclick="toggleAcc(\'' + id + '\')">' +
+                esc(title) +
+                '<span class="acc-icon"></span>' +
+              '</button>' +
+              '<div class="accordion-body"><pre>' + esc(item.body) + '</pre></div>' +
+            '</div>';
+        });
+      });
+      html += '</div>';
+      return html;
+    }
+
+    function renderCmdPractice() {
+      var cmds = [
+        {
+          label: '检查 Node.js 是否安装成功',
+          cmd: 'node -v',
+          hint: '如果显示 v18.x.x 或 v20.x.x 之类的版本号，说明安装成功。如果提示"不是内部或外部命令"，说明还没装，请先安装 Node.js。'
+        },
+        {
+          label: '检查 Git 是否安装成功',
+          cmd: 'git --version',
+          hint: '如果显示 git version 2.x.x 之类的版本号，说明安装成功。如果提示"不是内部或外部命令"，说明还没装，请先安装 Git。'
+        },
+        {
+          label: '检查 npm 是否可用',
+          cmd: 'npm -v',
+          hint: '如果显示版本号，说明 npm 可用。npm 是随 Node.js 一起安装的，如果这个命令失败，重新安装 Node.js 即可。'
+        }
+      ];
+      var cardsHtml = cmds.map(function (c, i) {
+        var btnId = 'btn-cp-' + i;
+        return '<div class="cmd-practice-card">' +
+          '<div class="cmd-practice-card-head">' + esc(c.label) + '</div>' +
+          '<div class="cmd-practice-card-body">' +
+            '<div class="cmd-practice-code">' + esc(c.cmd) + '</div>' +
+            '<button class="btn-cmd-practice-copy" id="' + btnId + '" onclick="copyCmdPractice(\'' + esc(c.cmd) + '\',\'' + btnId + '\')">复制</button>' +
+          '</div>' +
+          '<div class="cmd-practice-hint">' + esc(c.hint) + '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="cmd-practice-section">' +
+        '<div class="cmd-practice-title">练习基础命令</div>' +
+        '<p class="cmd-practice-desc">先按上面的"命令行"步骤打开 PowerShell、命令提示符或 VS Code 终端，再把下面三条命令分别运行一遍。网页不能直接弹出你电脑里的终端，只能帮你复制命令。</p>' +
+        '<div class="terminal-block">' +
+          '<div class="terminal-label">TERMINAL</div>' +
+          '<div class="cmd-practice-cards">' + cardsHtml + '</div>' +
+          '<div class="cmd-practice-done">三个命令都能看到版本号？太好了，你的基础环境已经就绪！接下来选一条路线开始。</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function renderRouteCards(projId) {
+      if (typeof ROUTES === 'undefined') {
+        return '<p style="color:var(--text-secondary);font-size:14px;">路线数据加载失败，请刷新页面重试。</p>';
+      }
+      var savedProj = getProject(projId);
+      var savedRouteId = (savedProj && savedProj.route_id) || '';
+      var html = '<div class="route-cards-list">';
+      ROUTES.forEach(function (route, idx) {
+        var routeNum = idx + 1;
+        var diffClass = route.difficulty === '简单' ? 'diff-easy' : (route.difficulty === '中等' ? 'diff-medium' : 'diff-hard');
+        var isChecked = savedRouteId === route.id;
+        html += '<div class="route-card" id="route-card-' + route.id + '">' +
+          '<div class="route-card-head">' +
+            '<div class="route-card-tag">' + esc(route.tag) + '</div>' +
+            '<div class="route-card-name">路线 ' + routeNum + '：' + esc(route.name) + '</div>' +
+            '<div class="route-card-summary">' + esc(route.summary) + '</div>' +
+            '<div class="route-card-meta">' +
+              '<div class="route-meta-item"><strong>适合谁：</strong>' + esc(route.fitFor) + '</div>' +
+              '<div class="route-meta-item"><strong>使用条件：</strong>' + esc(route.requirement) + '</div>' +
+              '<div class="route-meta-item"><strong>安装难度：</strong>' +
+                '<span class="route-difficulty ' + diffClass + '">' + esc(route.difficulty) + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<button class="btn-route-steps" onclick="toggleRouteSteps(\'' + route.id + '\')">' +
+              '查看安装步骤 <span class="btn-route-arrow"></span>' +
+            '</button>' +
+          '</div>' +
+          '<div class="route-steps-panel" id="route-steps-' + route.id + '">' +
+            renderInstallSteps(route, projId, isChecked) +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+      return html;
+    }
+
+    function renderInstallSteps(route, projId, isChecked) {
+      var html = '<div class="install-steps">';
+      route.steps.forEach(function (step, idx) {
+        var tsId = 'ts-' + route.id + '-' + idx;
+        html += '<div class="install-step">' +
+          '<div class="install-step-num">' + (idx + 1) + '</div>' +
+          '<div class="install-step-body">' +
+            '<div class="install-step-title">' + esc(step.title) + '</div>' +
+            '<div class="install-step-content">' + esc(step.content) + '</div>' +
+            '<div class="install-step-success">✓ ' + esc(step.successHint) + '</div>' +
+            '<div class="install-troubleshoot">' +
+              '<button class="btn-troubleshoot" onclick="toggleTroubleshoot(\'' + tsId + '\')">遇到问题？点击查看排查提示</button>' +
+              '<div class="troubleshoot-content" id="' + tsId + '">' + esc(step.troubleshootingHint) + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '<div class="route-complete-wrap">' +
+        '<label class="route-complete-label">' +
+          '<input type="checkbox" id="route-check-' + route.id + '" ' + (isChecked ? 'checked' : '') +
+            ' onchange="onRouteCheck(\'' + route.id + '\',\'' + esc(projId) + '\')">' +
+          ' 我已完成这条路线的安装 ✓' +
+        '</label>' +
+      '</div>';
+      html += '</div>';
+      return html;
+    }
+
+    /* ===== 构建任务拆解提示词 ===== */
+    function buildTaskPrompt() {
+      var content = designContent;
+      if (!content) {
+        return '（请先在第二步生成设计书，然后回来这里生成任务拆解提示词。）';
+      }
+      return '我是一个零基础的非程序员，想用 AI 编程工具做一个软件项目。\n下面是我的项目设计书，请帮我把它拆解成一步步的开发任务（task）。\n\n要求：\n1. 每个 task 只做一件小事，宁可多拆几个也不要合并太多\n2. 前几个 task 尽量简单，后面逐步增加复杂度\n3. task01 应该是项目初始化（创建基础文件结构）\n4. 每个 task 写清楚：编号、标题、目标、具体步骤、完成标志\n5. 最后附上一份 task01 的完整执行指令，我可以直接复制给 AI 编程工具\n\n项目设计书：\n---\n' + content + '\n---\n\n请开始拆解。如果有不清楚的地方，先问我再拆。';
+    }
+
+    /* ===== 下载设计书 ===== */
+    function downloadDoc(version, label) {
+      var text = (doc[version] || '').trim();
+      if (!text) return;
+      var blob = new Blob([text], { type: 'text/markdown' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = projectName + '-设计书-' + label + '.md';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /* ===== 渲染主页面 ===== */
+    var hasAnyDoc = !!(doc.popular || doc.standard || doc.ai_coding);
+
+    content.innerHTML =
+      '<div class="page-header">' +
+        '<h1>设计书已就绪，接下来怎么做？</h1>' +
+        '<p>你已经完成了最重要的一步——把模糊想法变成了清晰的设计书。现在按照下面的步骤，把设计书变成真正的产品。</p>' +
+      '</div>' +
+
+      '<div class="project-bar">' +
+        '<div class="project-bar-name">' + esc(projectName) + '</div>' +
+        '<span class="stage-badge">已生成设计书</span>' +
+        '<a href="design.html?id=' + projectId + '" class="project-bar-link">← 返回设计书</a>' +
+      '</div>' +
+
+      /* 第一步：创建文件夹 */
+      '<div class="section-card">' +
+        '<h2>第一步：在电脑上创建项目文件夹</h2>' +
+        '<p class="section-desc">所有的项目文件都会放在这个文件夹里，包括设计书、代码、资源等。</p>' +
+
+        '<div class="folder-input-wrap">' +
+          '<label class="folder-label" for="folder-name-input">给项目文件夹起个英文名（小写字母、数字和短横线）</label>' +
+          '<input type="text" id="folder-name-input" class="input" ' +
+            'placeholder="比如：career-helper、my-app、reading-tool" ' +
+            'value="' + esc(folderName) + '" ' +
+            'maxlength="60" />' +
+          '<div class="folder-error" id="folder-error">只允许小写字母、数字和短横线，不能以短横线开头或结尾</div>' +
+        '</div>' +
+
+        '<div class="os-grid">' +
+          '<div class="os-card">' +
+            '<div class="os-card-title">🪟 Windows（PowerShell）</div>' +
+            '<p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">步骤：按 Win 键 → 搜索 PowerShell → 回车打开，然后复制下面的命令：</p>' +
+            '<div class="cmd-line">' +
+              '<div class="cmd-text" id="win-cmd">mkdir C:\\Users\\你的用户名\\<span id="fn-win">' + esc(folderName) + '</span></div>' +
+              '<button class="btn-cmd-copy" onclick="copyCmd(\'win\')">复制</button>' +
+            '</div>' +
+            '<div class="cmd-line">' +
+              '<div class="cmd-text">cd C:\\Users\\你的用户名\\<span id="fn-win2">' + esc(folderName) + '</span></div>' +
+              '<button class="btn-cmd-copy" onclick="copyCmd(\'win2\')">复制</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="os-card">' +
+            '<div class="os-card-title">🍎 Mac（终端）</div>' +
+            '<p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">步骤：按 Cmd+空格 → 搜索 Terminal → 回车打开，然后复制下面的命令：</p>' +
+            '<div class="cmd-line">' +
+              '<div class="cmd-text">mkdir ~/Projects/<span id="fn-mac">' + esc(folderName) + '</span></div>' +
+              '<button class="btn-cmd-copy" onclick="copyCmd(\'mac\')">复制</button>' +
+            '</div>' +
+            '<div class="cmd-line">' +
+              '<div class="cmd-text">cd ~/Projects/<span id="fn-mac2">' + esc(folderName) + '</span></div>' +
+              '<button class="btn-cmd-copy" onclick="copyCmd(\'mac2\')">复制</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      /* 第二步：下载设计书 */
+      '<div class="section-card">' +
+        '<h2>第二步：把设计书保存到项目文件夹</h2>' +
+        '<p class="section-desc">把你之前生成的设计书文件下载到刚才创建的文件夹里。建议三个版本都保存，不同场景用不同版本。</p>' +
+
+        (hasAnyDoc ?
+          '<div class="doc-download-grid">' +
+            renderDocCard('popular', '通俗版设计书', '📄', '给非技术人看的大白话版本，适合发给朋友或合伙人', '通俗版') +
+            renderDocCard('standard', '标准产品版设计书', '📋', '规范的产品需求文档（PRD），适合正式参考', '标准版') +
+            renderDocCard('ai_coding', 'AI 编程版设计书', '🤖', '专门给 AI 编程工具读的版本，是后续开发的核心文件', 'AI编程版') +
+          '</div>' +
+          '<div class="info-box-cyan">' +
+            '下载后把这些文件放进你的项目文件夹。特别是 AI 编程版——后面你的 AI 编程工具需要读它。<br>' +
+            '如果你用 Claude Code，可以把它命名为 <strong>CLAUDE.md</strong> 放在项目根目录，Claude Code 会自动读取。' +
+          '</div>' +
+          '<button class="btn-secondary" onclick="downloadAll()" style="width:auto;">一键下载全部</button>'
+        :
+          '<div class="info-card warn">' +
+            '<div class="warn-title">⚠ 还没有设计书</div>' +
+            '<p>你还没有生成设计书。请先生成，再回到这里下载。</p>' +
+            '<a href="design.html?id=' + projectId + '" class="btn-primary" style="width:auto;display:inline-block;">去生成设计书</a>' +
+          '</div>'
+        ) +
+      '</div>' +
+
+      /* 第三步：选择路线并准备 AI 编程工具 */
+      '<div class="section-card">' +
+        '<h2>第三步：选择路线并准备 AI 编程工具</h2>' +
+        '<p class="section-desc">AI 编程有很多工具组合，不同组合适合不同的人。先了解基础知识，再选一条适合你的路线。</p>' +
+
+        '<div class="subsection-header">3.1 先了解几个基础概念</div>' +
+        '<p class="subsection-sub">如果你已经知道这些概念，可以跳过这部分。</p>' +
+        renderAccordionGroup('基础知识') +
+        renderCmdPractice() +
+
+        '<div class="subsection-header">3.2 选择一条适合你的路线</div>' +
+        '<p class="subsection-sub">每条路线是一个「AI 模型 + 编程工具」的组合。选一条最适合你当前情况的。</p>' +
+        '<div class="info-box-yellow">' +
+          '<strong>快速推荐：</strong><br>' +
+          '• 在中国大陆 + 零基础 + 想最快跑通 → 路线 1（DeepSeek + OpenCode）或路线 3（豆包 + TRAE）<br>' +
+          '• 在中国大陆 + 想要图形界面 → 路线 3（豆包 + TRAE）<br>' +
+          '• 能访问国际服务 + 想要最强能力 → 路线 6（Claude + Claude Code）<br>' +
+          '• 能访问国际服务 + 想要图形界面 → 路线 5（ChatGPT + Codex CLI）或装 Cursor' +
+        '</div>' +
+        renderRouteCards(projectId) +
+
+        '<div class="subsection-header">3.3 还不确定选哪个？</div>' +
+        '<p class="subsection-sub">下面是各主流工具的详细使用说明，供参考。</p>' +
+        renderAccordionGroup('AI 编程工具') +
+      '</div>' +
+
+      /* 第四步：AI 拆解任务 */
+      '<div class="section-card">' +
+        '<h2>第四步：让 AI 帮你把设计书拆解成开发任务</h2>' +
+        '<div class="info-box-cyan">' +
+          '<strong>注意：</strong>开发任务不是本站生成的。你需要打开一个 AI 大模型（如 Claude、ChatGPT），把设计书发给它，跟它对话来拆解任务。<br>' +
+          '这个过程是交互式的——AI 给你一个初步方案，你看了觉得不对可以让它调整，最终形成你满意的任务清单。' +
+        '</div>' +
+
+        '<p style="font-size:14px;font-weight:600;margin-bottom:10px;">步骤 1：打开你常用的 AI 大模型</p>' +
+        '<div class="ai-links">' +
+          '<a href="https://claude.ai" target="_blank" rel="noopener" class="ai-link-btn">Claude</a>' +
+          '<a href="https://chatgpt.com" target="_blank" rel="noopener" class="ai-link-btn">ChatGPT</a>' +
+          '<a href="https://www.doubao.com" target="_blank" rel="noopener" class="ai-link-btn">豆包</a>' +
+          '<a href="https://kimi.moonshot.cn" target="_blank" rel="noopener" class="ai-link-btn">Kimi</a>' +
+          '<a href="https://tongyi.aliyun.com" target="_blank" rel="noopener" class="ai-link-btn">通义千问</a>' +
+          '<a href="https://chat.deepseek.com" target="_blank" rel="noopener" class="ai-link-btn">DeepSeek</a>' +
+        '</div>' +
+
+        '<p style="font-size:14px;font-weight:600;margin-bottom:10px;">步骤 2：把下面这段话发给 AI（连同你的设计书内容）</p>' +
+        (designContent ?
+          '<button class="btn-primary" onclick="genTaskPrompt()" style="width:auto;">生成任务拆解提示词</button>' +
+          '<div class="prompt-box" id="pbox-task">' +
+            '<pre class="prompt-text" id="ptext-task"></pre>' +
+            '<button class="btn-copy" id="pcopy-task" onclick="copyById(\'ptext-task\',\'pcopy-task\')">复制</button>' +
+          '</div>'
+        :
+          '<div class="info-card warn" style="margin-top:12px;">' +
+            '<div class="warn-title">⚠ 请先生成设计书</div>' +
+            '<p>任务拆解需要读取你的设计书内容。请先生成设计书，再回到这里。</p>' +
+            '<a href="design.html?id=' + projectId + '" class="btn-primary" style="width:auto;display:inline-block;">去生成设计书</a>' +
+          '</div>'
+        ) +
+
+        '<div style="margin-top:16px;">' +
+          '<p style="font-size:14px;font-weight:600;margin-bottom:8px;">步骤 3：和 AI 来回讨论，直到你满意</p>' +
+          '<div style="font-size:13px;color:var(--text-secondary);line-height:1.8;">' +
+            'AI 给出任务清单后，你可以：<br>' +
+            '• 觉得某个 task 太复杂 → 让它拆细<br>' +
+            '• 觉得缺了什么功能 → 让它补上<br>' +
+            '• 觉得顺序不对 → 让它调整<br>' +
+            '• 满意后 → 继续下一步' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      /* 第五步：逐个执行任务 */
+      '<div class="section-card">' +
+        '<h2>第五步：用 AI 编程工具逐个执行任务</h2>' +
+        '<p class="section-desc">现在你有了任务清单，在 AI 编程工具中一个一个执行就行。</p>' +
+
+        '<div class="exec-flow">' +
+          '<div class="exec-step">' +
+            '<div class="exec-step-num">①</div>' +
+            '<div class="exec-step-body">打开你的 AI 编程工具，进入项目文件夹</div>' +
+          '</div>' +
+          '<div class="exec-step">' +
+            '<div class="exec-step-num">②</div>' +
+            '<div class="exec-step-body">' +
+              '把 task01 的内容发给它<br>' +
+              '<div class="sub">或者直接说：<code>请读取设计书，执行 task01</code></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="exec-step">' +
+            '<div class="exec-step-num">③</div>' +
+            '<div class="exec-step-body">AI 执行完毕后，自己检查一下结果是否符合预期</div>' +
+          '</div>' +
+          '<div class="exec-step">' +
+            '<div class="exec-step-num">④</div>' +
+            '<div class="exec-step-body">' +
+              '没问题 → 继续发 task02<br>' +
+              '<div class="sub">有问题 → 告诉 AI 哪里不对，让它修</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="exec-step">' +
+            '<div class="exec-step-num">⑤</div>' +
+            '<div class="exec-step-body">重复 ②-④ 直到全部任务完成</div>' +
+          '</div>' +
+          '<div class="exec-step">' +
+            '<div class="exec-step-num">⑥</div>' +
+            '<div class="exec-step-body">产品上线 🚀</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="info-box-cyan" style="margin-top:16px;">' +
+          '<strong>小技巧：</strong><br>' +
+          '• 如果用 Claude Code，可以直接说「请读取 CLAUDE.md，然后执行 task01」<br>' +
+          '• 每完成一个 task，建议用 Git 提交一次代码（AI 工具通常会帮你做）<br>' +
+          '• 遇到反复失败的问题，可以回到 AI 大模型对话中讨论，调整方案后再执行' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="actions-bar">' +
+        '<a href="workspace.html" class="btn-secondary">返回工作台</a>' +
+        '<button class="btn-primary" onclick="markComplete()">保存并标记项目完成</button>' +
+      '</div>';
+
+    /* ===== 辅助：渲染下载卡片 ===== */
+    function renderDocCard(version, title, emoji, desc, fileLabel) {
+      var hasContent = !!(doc[version] && doc[version].trim());
+      return '<div class="doc-download-card">' +
+        '<div class="doc-download-card-title">' + emoji + ' ' + title + '</div>' +
+        '<div class="doc-download-card-desc">' + desc + '</div>' +
+        (hasContent ?
+          '<button class="btn-primary" onclick="downloadDoc(\'' + version + '\',\'' + fileLabel + '\')" style="font-size:13px;padding:9px 16px;">下载 Markdown 文件</button>'
+        :
+          '<button class="btn-primary" disabled style="font-size:13px;padding:9px 16px;">未生成</button>'
+        ) +
+      '</div>';
+    }
+
+    /* ===== 文件夹名实时更新 ===== */
+    var folderInput = document.getElementById('folder-name-input');
+    folderInput.addEventListener('input', function () {
+      var val = folderInput.value.trim();
+      var valid = /^[a-z0-9][a-z0-9\-]*[a-z0-9]$/.test(val) || /^[a-z0-9]$/.test(val);
+      document.getElementById('folder-error').classList.toggle('show', val.length > 0 && !valid);
+
+      if (val && valid) {
+        ['fn-win','fn-win2','fn-mac','fn-mac2'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.textContent = val;
+        });
+        // 保存到 localStorage
+        updateProject(projectId, {
+          task_plan: Object.assign({}, taskPlan, { folder_name: val })
+        });
+        taskPlan.folder_name = val;
+      }
+    });
+
+    /* ===== 复制命令 ===== */
+    var CMD_MAP = {
+      'win':  function() { return 'mkdir C:\\Users\\你的用户名\\' + getFolderName(); },
+      'win2': function() { return 'cd C:\\Users\\你的用户名\\' + getFolderName(); },
+      'mac':  function() { return 'mkdir ~/Projects/' + getFolderName(); },
+      'mac2': function() { return 'cd ~/Projects/' + getFolderName(); }
+    };
+
+    function getFolderName() {
+      return document.getElementById('folder-name-input').value.trim() || 'my-project';
+    }
+
+    window.copyCmd = function (key) {
+      var text = CMD_MAP[key]();
+      var btn = event.target;
+      doCopy(text, btn);
+    };
+
+    /* ===== 任务拆解提示词 ===== */
+    window.genTaskPrompt = function () {
+      var el = document.getElementById('ptext-task');
+      el.textContent = buildTaskPrompt();
+      var box = document.getElementById('pbox-task');
+      box.classList.add('visible');
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    /* ===== 下载 ===== */
+    window.downloadDoc = function (version, label) {
+      var text = (doc[version] || '').trim();
+      if (!text) return;
+      var blob = new Blob([text], { type: 'text/markdown' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = projectName + '-设计书-' + label + '.md';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    window.downloadAll = function () {
+      var versions = [
+        { key: 'popular',   label: '通俗版' },
+        { key: 'standard',  label: '标准版' },
+        { key: 'ai_coding', label: 'AI编程版' }
+      ];
+      versions.forEach(function (v) {
+        if (doc[v.key] && doc[v.key].trim()) {
+          window.downloadDoc(v.key, v.label);
+        }
+      });
+    };
+
+    /* ===== 手风琴 ===== */
+    window.toggleAcc = function (id) {
+      var item = document.getElementById(id);
+      var isOpen = item.classList.contains('open');
+      document.querySelectorAll('.accordion-item.open').forEach(function (el) { el.classList.remove('open'); });
+      if (!isOpen) item.classList.add('open');
+    };
+
+    /* ===== 练习命令复制 ===== */
+    window.copyCmdPractice = function (text, btnId) {
+      var btn = document.getElementById(btnId);
+      doCopy(text, btn);
+    };
+
+    /* ===== 路线卡片展开 ===== */
+    window.toggleRouteSteps = function (routeId) {
+      var card = document.getElementById('route-card-' + routeId);
+      var panel = document.getElementById('route-steps-' + routeId);
+      var isOpen = card.classList.contains('route-card-open');
+      document.querySelectorAll('.route-card.route-card-open').forEach(function (el) {
+        el.classList.remove('route-card-open');
+        var p = el.querySelector('.route-steps-panel');
+        if (p) p.style.maxHeight = '0';
+      });
+      if (!isOpen) {
+        card.classList.add('route-card-open');
+        panel.style.maxHeight = '2000px';
+      }
+    };
+
+    /* ===== 故障排查展开 ===== */
+    window.toggleTroubleshoot = function (tsId) {
+      document.getElementById(tsId).classList.toggle('open');
+    };
+
+    /* ===== 路线完成勾选 ===== */
+    window.onRouteCheck = function (routeId, projId) {
+      var cb = document.getElementById('route-check-' + routeId);
+      updateProject(projId, { route_id: cb.checked ? routeId : '' });
+    };
+
+    /* ===== 复制工具 ===== */
+    window.copyById = function (textId, btnId) {
+      var text = document.getElementById(textId).textContent;
+      var btn = document.getElementById(btnId);
+      doCopy(text, btn);
+    };
+
+    function doCopy(text, btn) {
+      function markCopied() {
+        var orig = btn.textContent;
+        btn.textContent = '已复制 ✓'; btn.classList.add('copied');
+        setTimeout(function () { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(markCopied).catch(fb);
+      } else { fb(); }
+      function fb() {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta); markCopied();
+      }
+    }
+
+    /* ===== 标记完成 ===== */
+    window.markComplete = function () {
+      updateProject(projectId, { stage: 'tasks' });
+      document.getElementById('celebrate-overlay').style.display = 'flex';
+    };
+
+  })();
+  </script>
+</body>
+</html>

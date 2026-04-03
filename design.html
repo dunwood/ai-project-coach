@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>设计书生成 — AI 项目教练</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== 面包屑 ===== */
+    .breadcrumb { font-size: 13px; color: var(--text-secondary); margin-bottom: 28px; }
+    .breadcrumb a { color: var(--text-secondary); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb span { margin: 0 5px; }
+
+    /* ===== 页面标题 ===== */
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px; }
+    .page-header p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; max-width: 600px; }
+
+    /* ===== 摘要卡 ===== */
+    .summary-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .summary-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .summary-header:hover { background: var(--bg-tertiary); }
+    .summary-header-left { display: flex; flex-direction: column; gap: 3px; }
+    .summary-header-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; }
+    .summary-header-name { font-size: 15px; font-weight: 700; }
+    .summary-toggle { font-size: 18px; color: var(--text-secondary); transition: transform 0.3s; }
+    .summary-card.open .summary-toggle { transform: rotate(180deg); }
+    .summary-body { display: none; padding: 4px 20px 16px; border-top: 1px solid var(--border); }
+    .summary-card.open .summary-body { display: block; }
+    .summary-field { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(42,42,58,0.5); font-size: 13px; line-height: 1.6; }
+    .summary-field:last-of-type { border-bottom: none; }
+    .summary-field-name { font-weight: 600; color: var(--text-primary); min-width: 110px; flex-shrink: 0; }
+    .summary-field-value { color: var(--text-secondary); }
+    .summary-edit-link { display: inline-block; margin-top: 12px; font-size: 13px; }
+
+    /* ===== 版本 Tab ===== */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: var(--font-main);
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text-primary); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ===== 版本内容区 ===== */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .version-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    /* ===== Tab 切换淡入 ===== */
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .tab-panel.active { animation: tabFadeIn 0.2s ease both; }
+
+    /* ===== 提示词区 ===== */
+    .prompt-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .prompt-box { display: none; position: relative; margin-top: 14px; }
+    .prompt-box.visible { display: block; }
+    .prompt-text {
+      background: #0d0d16;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 80px 14px 18px;
+      font-family: var(--font-code);
+      font-size: 12px;
+      line-height: 1.7;
+      color: #cdd6f4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .btn-copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-family: var(--font-main);
+      font-weight: 600;
+      padding: 4px 11px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-copy:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-copy.copied { color: var(--success); border-color: var(--success); }
+
+    /* AI 平台链接 */
+    .ai-links-wrap { margin-top: 16px; }
+    .ai-links-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+    .ai-links { display: flex; flex-wrap: wrap; gap: 7px; }
+    .ai-link-btn {
+      display: inline-block;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .ai-link-btn:hover { color: var(--accent); border-color: rgba(0,229,255,0.4); }
+
+    /* ===== 分割线 ===== */
+    .divider-text {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin: 24px 0;
+      position: relative;
+    }
+    .divider-text::before, .divider-text::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 28%;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider-text::before { left: 0; }
+    .divider-text::after { right: 0; }
+
+    /* ===== 编辑区 + 预览区 左右分栏 ===== */
+    .editor-preview-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .editor-col {}
+    .preview-col {}
+
+    /* ===== 编辑区 ===== */
+    textarea.design-input {
+      width: 100%;
+      min-height: 340px;
+      resize: vertical;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 14px;
+      color: var(--text-primary);
+      font-family: var(--font-code);
+      font-size: 13px;
+      line-height: 1.7;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea.design-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+    }
+
+    /* ===== Markdown 预览 ===== */
+    .preview-section { }
+    .preview-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
+    .preview-body {
+      background: #15151f;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px 24px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      min-height: 340px;
+    }
+    .preview-body h1 { font-size: 20px; font-weight: 800; color: var(--text-primary); margin: 16px 0 8px; }
+    .preview-body h2 { font-size: 17px; font-weight: 700; color: var(--text-primary); margin: 14px 0 6px; }
+    .preview-body h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 12px 0 4px; }
+    .preview-body strong { color: var(--text-primary); font-weight: 700; }
+    .preview-body code { font-family: var(--font-code); font-size: 12px; background: var(--bg-tertiary); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .preview-body pre { background: #0d0d16; border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-family: var(--font-code); font-size: 12px; color: #cdd6f4; overflow-x: auto; margin: 10px 0; white-space: pre-wrap; }
+    .preview-body ul, .preview-body ol { padding-left: 20px; margin: 6px 0; }
+    .preview-body li { margin: 3px 0; }
+    .preview-body p { margin: 6px 0; }
+    .preview-empty { color: var(--text-secondary); font-size: 13px; font-style: italic; }
+
+    /* ===== 操作按钮栏 ===== */
+    .actions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .actions-left, .actions-right { display: flex; gap: 10px; flex-wrap: wrap; }
+    .actions-bar .btn-primary,
+    .actions-bar .btn-secondary { font-size: 14px; padding: 10px 20px; width: auto; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ===== 错误 / 警告卡 ===== */
+    .info-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .info-card.warn { border-color: rgba(255,215,64,0.3); background: rgba(255,215,64,0.05); }
+    .info-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.7; }
+    .info-card .warn-title { font-size: 15px; font-weight: 700; color: var(--warning); margin-bottom: 8px; }
+    .error-card { background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.25); border-radius: var(--radius-card); padding: 24px; }
+    .error-card p { color: var(--danger); font-size: 14px; margin-bottom: 14px; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 22px;
+      font-size: 14px;
+      color: var(--success);
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 768px) {
+      .tab-btn { padding: 8px 10px; font-size: 12px; }
+      .tab-bar { overflow-x: auto; flex-wrap: nowrap; }
+      .actions-bar { flex-direction: column; }
+      .actions-left, .actions-right { width: 100%; }
+      .actions-bar .btn-primary, .actions-bar .btn-secondary { flex: 1; }
+      .divider-text::before, .divider-text::after { width: 16%; }
+      /* 移动端编辑/预览上下堆叠 */
+      .editor-preview-wrap { grid-template-columns: 1fr; }
+      .prompt-text { padding-right: 16px; padding-bottom: 50px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+
+  <div class="page-body">
+    <div class="container" style="padding-top: 48px; padding-bottom: 100px; max-width: 760px;">
+
+      <!-- 返回导航 -->
+      <div class="page-nav">
+        <a href="index.html" class="nav-link">← 返回首页</a>
+        <a href="javascript:history.back()" class="nav-link">← 返回上一页</a>
+      </div>
+
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="index.html">首页</a><span>›</span>
+        <a href="workspace.html">工作台</a><span>›</span>
+        <span>设计书生成</span>
+      </div>
+
+      <!-- 主内容 -->
+      <div id="page-content"></div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <div id="footer-mount"></div>
+
+  <script src="js/project.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/legal.js"></script>
+  <script src="js/fingerprint.js"></script>
+  <script src="data/codes.js"></script>
+  <script src="js/access.js"></script>
+  <script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var projectId = params.get('id');
+    var content = document.getElementById('page-content');
+
+    /* ===== 错误显示 ===== */
+    function showError(msg, linkHtml) {
+      content.innerHTML =
+        '<div class="error-card"><p>' + msg + '</p>' +
+        (linkHtml || '<a href="workspace.html" class="btn-secondary" style="width:auto;display:inline-block;">返回工作台</a>') +
+        '</div>';
+    }
+
+    if (!projectId) { showError('未找到项目，请从工作台选择项目继续。'); return; }
+    var project = getProject(projectId);
+    if (!project) { showError('找不到该项目，可能已被删除。'); return; }
+
+    if (!project.clarify_answers) {
+      content.innerHTML =
+        '<div class="info-card warn">' +
+          '<div class="warn-title">⚠ 请先完成需求澄清</div>' +
+          '<p>生成设计书需要先完成需求澄清步骤，填写项目定义信息。</p>' +
+          '<a href="clarify.html?id=' + projectId + '" class="btn-primary" style="width:auto;display:inline-block;">前往需求澄清</a>' +
+        '</div>';
+      return;
+    }
+
+    var ans = project.clarify_answers;
+    var doc = project.design_doc || {};
+
+    /* ===== 暂存各版本内容（防止 tab 切换丢失） ===== */
+    var drafts = {
+      popular:   doc.popular   || '',
+      standard:  doc.standard  || '',
+      ai_coding: doc.ai_coding || ''
+    };
+
+    /* ===== 工具 ===== */
+    function esc(s) {
+      return String(s || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* ===== 摘要字段配置 ===== */
+    var FIELD_LABELS = [
+      ['project_name', '项目名称'], ['core_goal', '核心目标'],
+      ['target_users', '目标用户'], ['use_cases', '使用场景'],
+      ['input_data', '用户输入'], ['output_result', '系统输出'],
+      ['core_features', '核心功能'], ['non_core_features', '暂不实现'],
+      ['platform_type', '平台形态'], ['need_login', '是否需要登录'],
+      ['need_payment', '是否需要支付'], ['need_admin', '是否需要后台'],
+      ['data_source', '数据来源'], ['mvp_scope', 'MVP 范围'],
+      ['tech_difficulty', '技术难点']
+    ];
+
+    /* ===== 构建提示词变量行 ===== */
+    function buildInfoBlock() {
+      var lines = [];
+      var map = {
+        project_name: '项目名称', core_goal: '核心目标', target_users: '目标用户',
+        use_cases: '使用场景', input_data: '用户输入', output_result: '系统输出',
+        core_features: '核心功能', non_core_features: '暂不实现的功能',
+        platform_type: '平台形态', need_login: '是否需要登录',
+        need_payment: '是否需要支付', need_admin: '是否需要后台',
+        data_source: '数据来源', mvp_scope: '第一版范围'
+      };
+      Object.keys(map).forEach(function (k) {
+        var v = ans[k];
+        if (v && v.trim()) lines.push(map[k] + '：' + v.trim());
+      });
+      return lines.join('\n');
+    }
+
+    /* ===== 提示词模板 ===== */
+    var INFO = buildInfoBlock();
+
+    var PROMPTS = {
+      popular:
+        '请根据以下项目信息，写一份通俗易懂的产品说明书。\n\n' +
+        '要求：\n- 用大白话，不要技术术语\n- 像在跟朋友介绍你做的东西\n' +
+        '- 让完全不懂技术的人也能看明白这个产品是什么、给谁用、怎么用\n- 篇幅适中，不要太长\n\n' +
+        '项目信息：\n---\n' + INFO + '\n---',
+
+      standard:
+        '请根据以下项目信息，生成一份标准的产品需求文档（PRD）。\n\n' +
+        '要求包含以下章节：\n1. 项目概述\n2. 项目目标\n3. 目标用户\n4. 用户痛点\n' +
+        '5. 核心使用场景\n6. MVP 定义（第一版做什么，不做什么）\n' +
+        '7. 功能模块说明（每个功能详细描述）\n8. 页面与流程说明（用户从打开到完成的完整路径）\n' +
+        '9. 数据与输入输出说明\n10. 技术实现建议（推荐技术栈和架构）\n' +
+        '11. 风险与边界（可能遇到的问题和限制）\n12. 开发阶段建议（分几期做，每期做什么）\n\n' +
+        '格式要求：\n- 使用 Markdown 格式\n- 每个章节用 ## 标题\n- 重要内容加粗\n- 适当使用列表和表格\n\n' +
+        '项目信息：\n---\n' + INFO + '\n---',
+
+      ai_coding:
+        '请根据以下项目信息，生成一份专门给 AI 编程工具（如 Claude Code、Cursor、TRAE）阅读的项目规格文档。\n\n' +
+        '格式要求：CLAUDE.md / AGENTS.md 风格，包含以下部分：\n\n' +
+        '## 项目名称\n## 项目定位（一句话 + 详细说明）\n## 技术栈建议\n' +
+        '  - 推荐使用的语言、框架、部署平台\n  - 优先考虑纯前端方案（HTML + CSS + JS），除非项目确实需要后端\n' +
+        '  - 如果面向中国大陆用户，部署推荐 Cloudflare Pages，不用 Vercel\n' +
+        '## 开发原则（给 AI 编程工具的约束）\n## UI 设计原则\n## 文件结构建议（目录树）\n' +
+        '## 功能模块详细说明\n## 数据结构设计（JSON 格式）\n## 页面清单与路由\n' +
+        '## 开发任务分解建议（task01, task02...的大致规划）\n\n' +
+        '项目信息：\n---\n' + INFO + '\n---'
+    };
+
+    /* ===== 简易 Markdown 渲染 ===== */
+    function simpleMarkdownRender(text) {
+      if (!text || !text.trim()) return '<span class="preview-empty">（粘贴设计书内容后这里会显示预览）</span>';
+
+      // 先处理代码块（避免内部被其他规则处理）
+      var codeBlocks = [];
+      text = text.replace(/```[\s\S]*?```/g, function (m) {
+        codeBlocks.push(m.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, ''));
+        return '\x00CODE' + (codeBlocks.length - 1) + '\x00';
+      });
+
+      // 行级处理
+      var lines = text.split('\n');
+      var html = '';
+      var inUl = false, inOl = false;
+
+      function closeList() {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        if (inOl) { html += '</ol>'; inOl = false; }
+      }
+
+      lines.forEach(function (line) {
+        if (/^\x00CODE\d+\x00$/.test(line.trim())) {
+          closeList();
+          var idx = parseInt(line.trim().replace('\x00CODE', '').replace('\x00', ''));
+          html += '<pre>' + esc(codeBlocks[idx]) + '</pre>';
+          return;
+        }
+        if (/^### /.test(line)) { closeList(); html += '<h3>' + inline(line.slice(4)) + '</h3>'; return; }
+        if (/^## /.test(line))  { closeList(); html += '<h2>' + inline(line.slice(3)) + '</h2>'; return; }
+        if (/^# /.test(line))   { closeList(); html += '<h1>' + inline(line.slice(2)) + '</h1>'; return; }
+        if (/^[-*] /.test(line)) {
+          if (!inUl) { closeList(); html += '<ul>'; inUl = true; }
+          html += '<li>' + inline(line.slice(2)) + '</li>'; return;
+        }
+        if (/^\d+\. /.test(line)) {
+          if (!inOl) { closeList(); html += '<ol>'; inOl = true; }
+          html += '<li>' + inline(line.replace(/^\d+\. /, '')) + '</li>'; return;
+        }
+        closeList();
+        if (line.trim() === '') { html += '<br>'; return; }
+        html += '<p>' + inline(line) + '</p>';
+      });
+      closeList();
+      return html;
+    }
+
+    function inline(text) {
+      return esc(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
+    }
+
+    /* ===== Tab 配置 ===== */
+    var TABS = [
+      {
+        key: 'popular',
+        label: '通俗版',
+        desc: '生成一份大白话产品说明书，适合向非技术人士介绍你的产品。'
+      },
+      {
+        key: 'standard',
+        label: '标准产品版',
+        desc: '生成标准 PRD 格式的产品需求文档，包含完整的功能说明和技术建议，适合规范化项目管理。'
+      },
+      {
+        key: 'ai_coding',
+        label: 'AI 编程版',
+        desc: '生成 CLAUDE.md / AGENTS.md 风格的项目规格文档，专供 Claude Code、Cursor、TRAE 等 AI 编程工具读取使用。'
+      }
+    ];
+
+    var activeTab = 'standard';
+
+    /* ===== 渲染主页面 ===== */
+    function renderPage() {
+      var summaryFields = FIELD_LABELS.filter(function (f) { return ans[f[0]] && ans[f[0]].trim(); });
+
+      content.innerHTML =
+        /* 标题 */
+        '<div class="page-header">' +
+          '<h1>生成项目设计书</h1>' +
+          '<p>根据你已澄清的需求，用 AI 生成一份专业的设计书。选择一个版本，复制提示词到 AI 大模型，把生成的结果粘贴回来。</p>' +
+        '</div>' +
+
+        /* 摘要卡 */
+        '<div class="summary-card" id="summary-card">' +
+          '<div class="summary-header" onclick="toggleSummary()">' +
+            '<div class="summary-header-left">' +
+              '<div class="summary-header-label">项目定义摘要</div>' +
+              '<div class="summary-header-name">' + esc(ans.project_name || project.title) + '&nbsp;&nbsp;<span style="font-size:13px;color:var(--text-secondary);font-weight:400;">' + (ans.core_goal ? '— ' + esc(ans.core_goal.slice(0,40)) + (ans.core_goal.length>40?'...':'') : '') + '</span></div>' +
+            '</div>' +
+            '<div class="summary-toggle">▼</div>' +
+          '</div>' +
+          '<div class="summary-body">' +
+            summaryFields.map(function (f) {
+              return '<div class="summary-field"><div class="summary-field-name">' + f[1] + '</div><div class="summary-field-value">' + esc(ans[f[0]]) + '</div></div>';
+            }).join('') +
+            '<a href="clarify.html?id=' + projectId + '" class="summary-edit-link">← 返回修改需求</a>' +
+          '</div>' +
+        '</div>' +
+
+        /* Tab 栏 */
+        '<div class="tab-bar" id="tab-bar">' +
+          TABS.map(function (t) {
+            return '<button class="tab-btn' + (t.key === activeTab ? ' active' : '') +
+              '" onclick="switchTab(\'' + t.key + '\')">' + t.label + '</button>';
+          }).join('') +
+        '</div>' +
+
+        /* 版本面板 */
+        TABS.map(function (t) {
+          return renderPanel(t);
+        }).join('') +
+
+        /* 操作按钮栏 */
+        '<div class="actions-bar">' +
+          '<div class="actions-left">' +
+            '<button class="btn-secondary" onclick="saveCurrent()">保存当前版本</button>' +
+            '<button class="btn-secondary" onclick="exportMd()">导出 Markdown</button>' +
+          '</div>' +
+          '<div class="actions-right">' +
+            '<button class="btn-primary" id="btn-continue" onclick="saveContinue()">保存并查看下一步操作指南</button>' +
+          '</div>' +
+        '</div>';
+
+      updateContinueBtn();
+      // 激活当前 tab
+      document.getElementById('panel-' + activeTab).classList.add('active');
+    }
+
+    function renderPanel(t) {
+      return '<div class="tab-panel" id="panel-' + t.key + '">' +
+        '<p class="version-desc">' + t.desc + '</p>' +
+
+        /* 提示词区 */
+        '<div class="prompt-section">' +
+          '<button class="btn-primary" onclick="genPrompt(\'' + t.key + '\')" style="width:auto;">生成' + t.label + '提示词</button>' +
+          '<div class="prompt-box" id="pbox-' + t.key + '">' +
+            '<pre class="prompt-text" id="ptext-' + t.key + '"></pre>' +
+            '<button class="btn-copy" id="pcopy-' + t.key + '" onclick="copyPrompt(\'' + t.key + '\')">复制</button>' +
+          '</div>' +
+          '<div class="ai-links-wrap">' +
+            '<div class="ai-links-title">打开 AI 平台，粘贴提示词开始生成</div>' +
+            '<div class="ai-links">' +
+              '<a href="https://claude.ai" target="_blank" rel="noopener" class="ai-link-btn">Claude</a>' +
+              '<a href="https://chatgpt.com" target="_blank" rel="noopener" class="ai-link-btn">ChatGPT</a>' +
+              '<a href="https://www.doubao.com" target="_blank" rel="noopener" class="ai-link-btn">豆包</a>' +
+              '<a href="https://kimi.moonshot.cn" target="_blank" rel="noopener" class="ai-link-btn">Kimi</a>' +
+              '<a href="https://tongyi.aliyun.com" target="_blank" rel="noopener" class="ai-link-btn">通义千问</a>' +
+              '<a href="https://chat.deepseek.com" target="_blank" rel="noopener" class="ai-link-btn">DeepSeek</a>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        /* 分割线 */
+        '<div class="divider-text">在 AI 中生成设计书后，粘贴到下面：</div>' +
+
+        /* 编辑区 + 预览区 左右分栏 */
+        '<div class="editor-preview-wrap">' +
+          '<div class="editor-col">' +
+            '<textarea class="design-input" id="ta-' + t.key + '" placeholder="把 AI 生成的设计书内容粘贴到这里..." oninput="onInput(\'' + t.key + '\')">' + esc(drafts[t.key]) + '</textarea>' +
+          '</div>' +
+          '<div class="preview-col">' +
+            '<div class="preview-section">' +
+              '<div class="preview-label">预览</div>' +
+              '<div class="preview-body" id="preview-' + t.key + '">' + simpleMarkdownRender(drafts[t.key]) + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+      '</div>';
+    }
+
+    /* ===== 交互函数（挂在 window 上供内联 onclick 调用） ===== */
+    window.toggleSummary = function () {
+      document.getElementById('summary-card').classList.toggle('open');
+    };
+
+    window.switchTab = function (key) {
+      // 保存当前 textarea 值到 drafts
+      var cur = document.getElementById('ta-' + activeTab);
+      if (cur) drafts[activeTab] = cur.value;
+
+      activeTab = key;
+      document.querySelectorAll('.tab-btn').forEach(function (b, i) {
+        b.classList.toggle('active', TABS[i].key === key);
+      });
+      document.querySelectorAll('.tab-panel').forEach(function (p) {
+        p.classList.toggle('active', p.id === 'panel-' + key);
+      });
+    };
+
+    window.genPrompt = function (key) {
+      var box = document.getElementById('pbox-' + key);
+      document.getElementById('ptext-' + key).textContent = PROMPTS[key];
+      box.classList.add('visible');
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.copyPrompt = function (key) {
+      var text = document.getElementById('ptext-' + key).textContent;
+      var btn = document.getElementById('pcopy-' + key);
+      function markCopied() {
+        btn.textContent = '已复制 ✓';
+        btn.classList.add('copied');
+        setTimeout(function () { btn.textContent = '复制'; btn.classList.remove('copied'); }, 2000);
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(markCopied).catch(fallbackCopy);
+      } else { fallbackCopy(); }
+      function fallbackCopy() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        markCopied();
+      }
+    };
+
+    window.onInput = function (key) {
+      var val = document.getElementById('ta-' + key).value;
+      drafts[key] = val;
+      document.getElementById('preview-' + key).innerHTML = simpleMarkdownRender(val);
+      updateContinueBtn();
+    };
+
+    function updateContinueBtn() {
+      var hasAny = drafts.popular.trim() || drafts.standard.trim() || drafts.ai_coding.trim();
+      var btn = document.getElementById('btn-continue');
+      if (btn) btn.disabled = !hasAny;
+    }
+
+    window.saveCurrent = function () {
+      var cur = document.getElementById('ta-' + activeTab);
+      if (cur) drafts[activeTab] = cur.value;
+      var update = { design_doc: Object.assign({}, drafts) };
+      updateProject(projectId, update);
+      showToast('已保存 ✓');
+    };
+
+    window.exportMd = function () {
+      var cur = document.getElementById('ta-' + activeTab);
+      if (cur) drafts[activeTab] = cur.value;
+      var text = drafts[activeTab];
+      if (!text.trim()) { showToast('当前版本暂无内容'); return; }
+      var tab = TABS.find(function (t) { return t.key === activeTab; });
+      var today = new Date();
+      var d = today.getFullYear() + '-' + pad(today.getMonth()+1) + '-' + pad(today.getDate());
+      var name = (ans.project_name || project.title) + '-设计书-' + tab.label + '-' + d + '.md';
+      var blob = new Blob([text], { type: 'text/markdown' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    window.saveContinue = function () {
+      var cur = document.getElementById('ta-' + activeTab);
+      if (cur) drafts[activeTab] = cur.value;
+      updateProject(projectId, { design_doc: Object.assign({}, drafts), stage: 'design' });
+      window.location.href = 'tasks.html?id=' + projectId;
+    };
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(function () { t.classList.remove('show'); }, 2200);
+    }
+
+    /* ===== 初始渲染 ===== */
+    renderPage();
+
+  })();
+  </script>
+</body>
+</html>
